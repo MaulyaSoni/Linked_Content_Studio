@@ -4,6 +4,14 @@ Core Package - LinkedIn Content Generation Engine
 Clean 3-layer architecture for LinkedIn content generation.
 """
 
+# Load environment variables
+import os
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 from .generator import LinkedInGenerator
 from .models import (
     PostRequest, PostResponse, GenerationMode,

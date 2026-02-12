@@ -101,20 +101,39 @@ class LinkedInGenerator:
             if not self.llm_available or not self.llm:
                 return self._generate_demo_response(request)
 
+            # Use the mode from the REQUEST (what the user chose in UI),
+            # not self.mode (which is the generator default).
+            active_mode = request.mode
+            self.logger.info(f"🎯 Generation mode: {active_mode.value}")
+
             context = None
             context_sources = ["direct_prompt"]
 
             # ---- ADVANCED MODE with LAZY RAG INIT ----
-            if self.mode == GenerationMode.ADVANCED:
+            if active_mode == GenerationMode.ADVANCED:
                 # Lazy initialization - only load RAG when needed
                 if self._ensure_rag_initialized():
                     try:
                         context = self.rag_engine.retrieve_context(request)
                         context_sources = context.sources_used
+                        self.logger.info(f"✅ RAG context retrieved: {len(context.content)} chars, sources: {context_sources}")
                     except Exception as e:
                         self.logger.warning(f"⚠️ RAG failed, fallback to simple: {e}")
                 else:
                     self.logger.info("📝 RAG unavailable, using SIMPLE mode")
+
+            # ---- SIMPLE MODE with GitHub URL ----
+            # Even in simple mode, if a GitHub URL is provided we should
+            # fetch basic context so the post is about the actual repo.
+            elif request.github_url:
+                self.logger.info("📝 Simple mode with GitHub URL — fetching repo context")
+                if self._ensure_rag_initialized():
+                    try:
+                        context = self.rag_engine.retrieve_context(request)
+                        context_sources = context.sources_used
+                        self.logger.info(f"✅ Repo context for simple mode: {len(context.content)} chars")
+                    except Exception as e:
+                        self.logger.warning(f"⚠️ Repo context fetch failed: {e}")
 
             # ---- BUILD PSYCHOLOGY PROMPT ----
             prompt = build_prompt(request, context)
@@ -130,13 +149,6 @@ class LinkedInGenerator:
             generation_time = (datetime.now() - start_time).total_seconds()
             self._update_metrics(generation_time)
 
-            stats = GenerationStats(
-                generation_time=generation_time,
-                mode_used=self.mode.value,
-                context_sources=context_sources,
-                tokens_used=result.tokens_used
-            )
-
             return PostResponse(
                 success=True,
                 post=post,
@@ -144,8 +156,8 @@ class LinkedInGenerator:
                 caption=caption,
                 context_sources=context_sources,
                 tokens_used=result.tokens_used,
-                mode_used=self.mode.value,
-                stats=stats
+                mode_used=active_mode.value,
+                generation_time=generation_time
             )
 
         except Exception as e:

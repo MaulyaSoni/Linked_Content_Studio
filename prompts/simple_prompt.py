@@ -86,7 +86,7 @@ def build_prompt(request, context=None):
     """
     
     # ADVANCED MODE - Context available from RAG
-    if context is not None:
+    if context is not None and hasattr(context, 'content') and context.content:
         return AdvancedPrompt.build(request, context)
     
     # SIMPLE MODE - No RAG, pure psychology

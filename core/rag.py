@@ -10,7 +10,9 @@ from dataclasses import dataclass
 
 from .models import PostRequest, RepoContext, RAGContext
 from langchain_core.documents import Document
-
+ 
+# Module logger
+logger = logging.getLogger(__name__)
 
 
 class RAGEngine:
@@ -155,27 +157,38 @@ class RAGEngine:
                 sources_used.append("dependencies")
             
             consolidated_context = "\n\n".join(context_parts)
-            
+
             # Calculate quality score
             quality_score = self._calculate_quality_score(repo_context)
-            
-            return RAGContext(
+
+            context = RAGContext(
                 content=consolidated_context,
                 sources_used=sources_used,
                 quality_score=quality_score,
                 repo_context=repo_context
             )
+
+            # Debug logging for returned context
+            logger.info("Context retrieved: %d chars", len(context.content))
+            logger.info("Sources: %s", context.sources_used)
+
+            return context
             
         except Exception as e:
             self.logger.error(f"GitHub context retrieval failed: {e}")
             
             # Fallback: basic context from URL
             repo_name = github_url.split('/')[-1].replace('.git', '')
-            return RAGContext(
+            context = RAGContext(
                 content=f"GitHub repository: {repo_name}\nAnalyzing repository structure and codebase.",
                 sources_used=["github_url"],
                 quality_score=0.3  # Low quality fallback
             )
+
+            logger.info("Context retrieved (fallback): %d chars", len(context.content))
+            logger.info("Sources: %s", context.sources_used)
+
+            return context
     
     def _retrieve_text_context(self, text_input: str, topic: str) -> RAGContext:
         """Retrieve context from provided text input."""
@@ -188,11 +201,16 @@ class RAGEngine:
         if topic:
             quality_score = min(1.0, quality_score + 0.2)  # Bonus for having topic
         
-        return RAGContext(
+        context = RAGContext(
             content=enhanced_context,
             sources_used=["text_input", "topic"] if topic else ["text_input"],
             quality_score=quality_score
         )
+
+        logger.info("Context retrieved (text): %d chars", len(context.content))
+        logger.info("Sources: %s", context.sources_used)
+
+        return context
     
     def _retrieve_topic_context(self, topic: str) -> RAGContext:
         """Retrieve context for topic-only generation."""
@@ -208,11 +226,16 @@ class RAGEngine:
         - Encourages discussion
         """
         
-        return RAGContext(
+        context = RAGContext(
             content=context,
             sources_used=["topic"],
             quality_score=0.6  # Medium quality - topic only
         )
+
+        logger.info("Context retrieved (topic): %d chars", len(context.content))
+        logger.info("Sources: %s", context.sources_used)
+
+        return context
     
     def _calculate_quality_score(self, repo_context: RepoContext) -> float:
         """Calculate context quality score (0-1 scale)."""
@@ -338,8 +361,18 @@ def create_rag_engine() -> RAGEngine:
     """Factory function to create RAG engine.""" 
     return RAGEngine()
 
-
 if __name__ == "__main__":
-    # Quick test
+    # Quick demo when running this module directly. Configure basic
+    # logging so debug messages are visible on stdout.
+    logging.basicConfig(level=logging.INFO)
+
     rag = create_rag_engine()
     print(f"RAG Engine Status: {rag.get_status()}")
+
+    # Demo retrieval using a simple topic (safe, no network calls required)
+    try:
+        demo_request = PostRequest(content_type=None, topic="AI in developer tooling")
+        ctx = rag.retrieve_context(demo_request)
+        print(f"Retrieved context ({len(ctx.content)} chars), sources: {ctx.sources_used}")
+    except Exception as e:
+        logger.exception("Demo retrieval failed: %s", e)

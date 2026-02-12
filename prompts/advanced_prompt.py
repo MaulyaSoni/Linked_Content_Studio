@@ -16,8 +16,16 @@ class AdvancedPrompt:
     def build(request, context):
         """Build RAG-enhanced prompt with founder authority positioning."""
         
-        # Get topic from request
-        topic = request.topic or request.text_input or "your project"
+        # Get topic from request — prefer github_url-derived name when available
+        github_url = getattr(request, 'github_url', '') or ''
+        repo_name = ''
+        if github_url:
+            # Extract owner/repo from URL for explicit mention
+            parts = github_url.rstrip('/').split('/')
+            if len(parts) >= 2:
+                repo_name = f"{parts[-2]}/{parts[-1]}"
+        
+        topic = request.topic or repo_name or request.text_input or "your project"
         tone = getattr(request.tone, 'value', str(request.tone)) if hasattr(request.tone, 'value') else str(request.tone)
         audience = getattr(request.audience, 'value', str(request.audience)) if hasattr(request.audience, 'value') else str(request.audience)
         
@@ -27,11 +35,21 @@ class AdvancedPrompt:
         else:
             context_str = str(context) if context else "[Repository or project context]"
         
+        # Build repo-specific instruction when we have a GitHub URL
+        repo_instruction = ""
+        if repo_name:
+            repo_instruction = f"""
+🔗 GITHUB REPOSITORY: {repo_name} ({github_url})
+The post MUST be specifically about this repository and its technology.
+Reference actual details from the context (languages, features, architecture, README).
+Do NOT write a generic post — every sentence should relate to this project.
+"""
+        
         return f"""
 You are writing as a real founder or developer who built or deeply studied this project.
 
 Use the context below to extract REAL insights (not summaries).
-
+{repo_instruction}
 📋 CONTEXT:
 {context_str}
 
