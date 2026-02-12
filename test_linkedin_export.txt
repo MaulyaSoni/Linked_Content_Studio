@@ -1,0 +1,14 @@
+🚀 Just launched our new AI-powered LinkedIn content generator!
+
+This tool leverages advanced language models to create engaging, professional posts tailored to your GitHub projects. 
+
+Key features:
+✅ Smart content analysis from GitHub repos
+✅ Multiple writing styles (Professional, Casual, Technical)
+✅ Automatic hashtag generation
+✅ Safety checks to prevent hallucinations
+✅ Export to multiple formats
+
+The future of content creation is here! 🔥
+
+#AI #MachineLearning #LinkedIn #ContentCreation #GitHub #LangChain #Automation #SocialMedia #TechInnovation

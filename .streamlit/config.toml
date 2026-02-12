@@ -1,0 +1,16 @@
+[client]
+showErrorDetails = true
+toolbarMode = "viewer"
+
+[logger]
+level = "error"
+
+# Disable file watching for modules that cause issues
+[watcher]
+ignoreWSGIModules = true
+
+[server]
+# Increase timeouts to handle slower systems
+maxUploadSize = 200
+enableCORS = false
+enableXsrfProtection = true
