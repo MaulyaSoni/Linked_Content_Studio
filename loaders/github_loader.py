@@ -230,3 +230,112 @@ Forks: {repo_data.get('forks_count', 0)}
             raise Exception(f"Failed to load any content from {repo_url}")
         
         return documents
+    
+    def load_with_fallback(self, repo_url: str = None):
+        """
+        Production-safe GitHub loading with comprehensive fallback strategy.
+        
+        Tries:
+        1. README → Repo metadata → File structure → Basic info
+        2. Never crashes - always returns valid RepoContext
+        
+        Args:
+            repo_url: GitHub repository URL (can be None if initialized with URL)
+            
+        Returns:
+            RepoContext object with all available information
+        """
+        from core.models import RepoContext
+        
+        # Use provided URL or fall back to initialized URL
+        url = repo_url or getattr(self, 'repo_url', None)
+        if not url:
+            return self._fallback_empty("No repository URL provided")
+        
+        try:
+            owner, repo = self.parse_github_url(url)
+            repo_name = f"{owner}/{repo}"
+            
+            context = RepoContext(
+                name=repo_name,
+                sources_used=[],
+                fallback_used=False
+            )
+            
+            # Try 1: Load README
+            try:
+                readme_docs = self.load_readme(url)
+                if readme_docs:
+                    context.readme_content = readme_docs[0].page_content
+                    context.readme_found = True
+                    context.sources_used.append("readme")
+            except Exception:
+                pass  # Silent fail, continue to next source
+            
+            # Try 2: Load repo metadata
+            try:
+                info_docs = self.load_repo_info(url)
+                if info_docs:
+                    metadata = info_docs[0].metadata
+                    context.description = info_docs[0].page_content.split('Description:')[1].split('\n')[0].strip() if 'Description:' in info_docs[0].page_content else ""
+                    context.language = metadata.get('language', '')
+                    context.stars = metadata.get('stars', 0)
+                    context.sources_used.append("metadata")
+            except Exception:
+                pass
+            
+            # Try 3: Load file structure
+            try:
+                files_docs = self.load_files_list(url)
+                if files_docs:
+                    files_content = files_docs[0].page_content
+                    context.file_structure = [line.strip() for line in files_content.split('\n') if line.strip() and line.strip() != 'Repository Files:']
+                    context.sources_used.append("file_structure")
+            except Exception:
+                pass
+            
+            # Calculate quality score
+            if context.readme_found:
+                context.quality_score = 1.0
+                context.completeness = "complete"
+            elif context.description or context.file_structure:
+                context.quality_score = 0.6
+                context.completeness = "partial"
+            else:
+                context.quality_score = 0.3
+                context.completeness = "minimal"
+                context.fallback_used = True
+                context.transparency_message = f"Limited information available for {repo_name}"
+            
+            return context
+            
+        except Exception as e:
+            # Ultimate fallback
+            return self._fallback_empty(url, str(e))
+    
+    def _fallback_empty(self, url: str, error: str = "") -> 'RepoContext':
+        """
+        Create minimal fallback RepoContext when all loading fails.
+        
+        Args:
+            url: Repository URL or error context
+            error: Error message
+            
+        Returns:
+            Minimal RepoContext for graceful degradation
+        """
+        from core.models import RepoContext
+        
+        repo_name = url.split('/')[-1].replace('.git', '') if '/' in url else url
+        
+        return RepoContext(
+            name=repo_name,
+            description=f"Repository analysis: {repo_name}",
+            readme_content=f"Analyzing GitHub repository: {repo_name}\n\nNo README available. Generating insights from repository context.",
+            sources_used=["fallback"],
+            quality_score=0.2,
+            completeness="minimal",
+            readme_found=False,
+            fallback_used=True,
+            transparency_message=f"Unable to load repository details. {error if error else 'Using basic context.'}"
+        )
