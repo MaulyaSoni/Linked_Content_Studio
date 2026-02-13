@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from datetime import datetime
 import logging
 
-from prompts.simple_prompt import build_prompt
+from .prompts import PromptBuilder
 from .models import PostRequest, PostResponse, GenerationMode
 from .rag import RAGEngine
 from .llm import LLMProvider
@@ -136,7 +136,19 @@ class LinkedInGenerator:
                         self.logger.warning(f"⚠️ Repo context fetch failed: {e}")
 
             # ---- BUILD PSYCHOLOGY PROMPT ----
-            prompt = build_prompt(request, context)
+            # Use PromptBuilder with enhanced psychology-driven prompts
+            if context and hasattr(context, 'content') and context.content:
+                # ADVANCED mode with context
+                prompt = PromptBuilder.build_advanced_prompt(
+                    request=request,
+                    context=context.content,
+                    context_sources=context.sources_used
+                )
+                self.logger.info(f"✅ Using ADVANCED prompt with {len(context.content)} chars of context")
+            else:
+                # SIMPLE mode without context
+                prompt = PromptBuilder.build_simple_prompt(request=request)
+                self.logger.info("✅ Using SIMPLE prompt (no context)")
 
             # ---- GENERATE ----
             result = self.llm.generate(prompt)

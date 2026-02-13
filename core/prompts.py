@@ -13,41 +13,11 @@ class PromptBuilder:
     
     @staticmethod
     def build_simple_prompt(request: PostRequest) -> str:
-        """Build a SIMPLE mode prompt for direct LLM generation.
+        """Build SIMPLE mode prompt with enhanced psychology."""
         
-        PSYCHOLOGY FORMULA:
-        1. Pattern Interrupt Hook (1-2 lines)
-        2. Relatable Struggle (1-2 lines)
-        3. Transformation/Insight (1-2 lines)
-        4. Tactical Value (Bullets or specifics)
-        5. Soft CTA (Engagement, not sales)
-        
-        Args:
-            request: PostRequest with topic and preferences
-            
-        Returns:
-            Formatted prompt string
-        """
-        
-        hook_examples = {
-            ContentType.HOT_TAKE: "Most people get this wrong.",
-            ContentType.EDUCATIONAL: "Here's what you need to know.",
-            ContentType.FOUNDER_LESSON: "I learned this the hard way.",
-            ContentType.BUILD_IN_PUBLIC: "Building in public isn't just marketing.",
-        }
-        
-        hook = hook_examples.get(
-            request.content_type,
-            "Here's something worth knowing."
-        )
-        
-        tone_instruction = PromptBuilder._get_tone_instruction(request.tone)
-        audience_instruction = PromptBuilder._get_audience_instruction(
-            request.audience
-        )
-        
-        prompt = f"""You are a professional LinkedIn content creator specializing in 
-scroll-stopping, conversion-focused posts.
+        prompt = f"""You are a world-class LinkedIn content creator who writes posts that STOP SCROLLING.
+
+Your posts don't feel like AI. They feel like a smart friend sharing a breakthrough.
 
 CONTENT REQUEST:
 - Topic/Achievement: {request.topic}
@@ -56,33 +26,117 @@ CONTENT REQUEST:
 - Target Audience: {request.audience.value}
 - Max Length: {request.max_length} characters
 
-INSTRUCTIONS:
-{tone_instruction}
-{audience_instruction}
+CRITICAL: You must follow this exact psychology formula:
 
-FORMULA (This is critical - follow exactly):
-1. Start with a pattern-interrupt hook that stops scrolling
-   "{hook}"
-   
-2. Show relatable struggle (1-2 sentences about common problem)
+SECTION 1 - THE HOOK (Lines 1-2):
+⚡ START WITH A BOLD STATEMENT OR COUNTERINTUITIVE INSIGHT
+Examples of STRONG hooks:
+- "Everyone's doing this wrong"
+- "I spent 6 months learning this ONE thing"
+- "Nobody talks about this, but..."
+- "This cost me 6 figures to learn"
+- "The best kept secret in [industry]"
+- "I almost gave up, then..."
 
-3. Present transformation/insight (What they learn)
+DON'T USE WEAK HOOKS:
+❌ "Here's what I learned..."
+❌ "Let me share with you..."
+❌ "I want to talk about..."
 
-4. Give tactical value (3-5 bullet points with specifics)
+SECTION 2 - THE STRUGGLE (Lines 3-5):
+🎭 Show relatable pain or confusion
+- What was the problem?
+- Why did it matter?
+- Who else is struggling with this?
 
-5. Soft CTA (Ask a question or invite engagement - NO hard selling)
+Make it SPECIFIC. Use numbers, timelines, concrete details.
+NOT: "I had problems"
+YES: "I lost 3 months and $15K before I figured it out"
 
-CRITICAL RULES:
-- Sound human, not AI
-- Use short paragraphs (1-3 lines max)
-- Include emojis sparingly but strategically
-- Be specific (numbers, names, real examples)
-- Show vulnerability with strength
-- Write like you're talking to a friend
-- Make readers want to respond
+SECTION 3 - THE TRANSFORMATION (Lines 6-8):
+💡 THE AHA MOMENT
+- What changed?
+- What insight did you have?
+- How did it shift your perspective?
 
-Generate the LinkedIn post now. Do NOT include hashtags - they'll be added separately.
-Start writing immediately, no preamble."""
+Make it emotional but authentic.
+NOT: "Everything changed"
+YES: "The moment I realized X, everything became crystal clear"
+
+SECTION 4 - THE TACTICAL VALUE (Lines 9-14):
+🎯 SPECIFIC, ACTIONABLE TAKEAWAYS
+Use bullet points with concrete details:
+• Include numbers (percentages, days, $)
+• Be specific (not generic advice)
+• Give real examples
+• Show results
+
+NOT:
+- Focus on goals
+- Be consistent
+- Never give up
+
+YES:
+- We cut response time from 4 days to 4 hours
+- It took exactly 21 days to see results
+- The top 3% of [role] all do this one thing
+
+SECTION 5 - THE SOFT CTA (Last 2-3 lines):
+🤝 ENGAGEMENT (Not selling)
+
+Examples:
+- "What's your experience with this?"
+- "Did you figure this out the hard way too?"
+- "Curious if you've seen this pattern"
+- "Would love to hear what worked for you"
+- "Reply: have you tried this?"
+
+NEVER:
+❌ "DM me for more"
+❌ "Buy my course"
+❌ "Follow for more"
+
+---
+
+TONE RULES:
+IF PROFESSIONAL: Use industry terminology, show expertise, include results
+IF CASUAL: Conversational, "I/you/we", short sentences
+IF BOLD: No hedging, strong declarations, contrarian takes
+IF THOUGHTFUL: Nuance, complexity, philosophical depth
+
+AUDIENCE RULES:
+IF DEVELOPERS: Technical specifics, dev pain points, frameworks, performance metrics
+IF FOUNDERS: Business outcomes, revenue, growth, fundraising, hiring
+IF PROFESSIONALS: Career growth, work-life balance, leadership, industry trends
+IF ENTREPRENEURS: Hustling, bootstrapping, customer insights, mindset
+
+FORBIDDEN PATTERNS (These make posts sound AI):
+❌ "In today's world..."
+❌ "As a [role], I believe..."
+❌ "The key to success is..."
+❌ "It's important to..."
+❌ "When all is said and done..."
+❌ "In conclusion..."
+❌ Overuse of "and" - use short. Punchy. Sentences.
+❌ Multiple emojis in a row
+❌ ALL CAPS for emphasis
+❌ "Feel free to reach out"
+
+ENGAGEMENT OPTIMIZATION:
+✓ Questions at the end get 2x more engagement
+✓ Numbers get 1.8x more engagement
+✓ Under 1,300 characters gets more shares
+✓ Line breaks matter (readability)
+✓ Vulnerability gets 3x more comments
+
+NOW WRITE THE POST:
+- Follow the 5-section formula EXACTLY
+- Write like a human, not an AI
+- Make it specific, not generic
+- Include at least one number
+- End with a question
+- Keep paragraphs short (2-3 lines max)
+- Start writing immediately, no preamble."""
         
         return prompt.strip()
     
@@ -92,80 +146,112 @@ Start writing immediately, no preamble."""
         context: str,
         context_sources: list
     ) -> str:
-        """Build an ADVANCED mode prompt with RAG context injection.
-        
-        This prompt is more detailed and context-aware.
-        
-        Args:
-            request: PostRequest
-            context: RAG-retrieved context
-            context_sources: List of sources used
-            
-        Returns:
-            Formatted prompt string
-        """
-        
-        tone_instruction = PromptBuilder._get_tone_instruction(request.tone)
-        audience_instruction = PromptBuilder._get_audience_instruction(
-            request.audience
-        )
+        """Build ADVANCED mode prompt with context and psychology."""
         
         sources_str = "\n".join(f"- {s}" for s in context_sources[:3])
         
-        prompt = f"""You are a professional LinkedIn content creator who creates posts
-that convert readers to engaged followers.
+        prompt = f"""You are a world-class LinkedIn content creator writing SPECIFIC, CREDIBLE posts.
 
-CONTEXT FROM SOURCE (Use these specific details):
+You have exclusive context about someone's project/achievement. Your job is to write a post that positions them as an expert while being authentically grounded in reality.
+
+CONTEXT FROM SOURCE:
 {context}
 
 SOURCES USED:
 {sources_str}
 
 CONTENT REQUEST:
-- Topic/Achievement: {request.topic or request.github_url}
+- Topic/Project: {request.github_url or request.topic}
 - Content Type: {request.content_type.value}
 - Tone: {request.tone.value}
-- Target Audience: {request.audience.value}
+- Audience: {request.audience.value}
 - Max Length: {request.max_length} characters
 
-INSTRUCTIONS:
-{tone_instruction}
-{audience_instruction}
+---
 
-ADVANCED FORMULA (Critical for technical content):
-1. Hook with a specific insight from context (not generic)
-   - Reference something unique about the project/achievement
-   - Create curiosity or recognition
+YOUR MISSION:
+Write a post that:
+1. Demonstrates deep knowledge (use SPECIFIC details from context)
+2. Tells a transformation story
+3. Positions them as credible/expert
+4. Generates engagement/DMs
+5. Sounds 100% human
 
-2. Show relatable struggle (Why does this matter to them?)
+---
 
-3. Demonstrate expertise (Use specifics from context)
-   - Mention specific technologies, approaches, results
-   - Show you deeply understand the topic
+THE FORMULA:
 
-4. Transformation (What will they gain?)
-   - Clear benefit or insight
+SECTION 1 - SPECIFIC HOOK (1-2 lines):
+⚡ Reference something SPECIFIC from the context
+NOT: "I built something cool"
+YES: "I spent 6 months building [specific project] and here's what destroyed my assumptions"
 
-5. Tactical wisdom (Actionable takeaways)
-   - Specific, numbered points
-   - Directly from the context/experience
+SECTION 2 - SHOW THE STRUGGLE (2-3 lines):
+🎭 What problem were they solving? Who has this problem? Why is it hard?
 
-6. Authority positioning (Subtle, not braggy)
-   - "I've built" or "I've seen"
-   - Invite deeper conversation
+SECTION 3 - THE INSIGHT (2-3 lines):
+💡 The breakthrough moment. What did they learn?
 
-7. Soft CTA (Engagement)
-   - Question that invites discussion
-   - Reference something in the context
+SECTION 4 - DEMONSTRATE EXPERTISE (3-5 lines):
+⭐ Use SPECIFIC context details
+- Reference specific technologies/approaches
+- Explain WHY they work
+- Use insider terminology
+- Mention metrics/results if available
 
-CRITICAL RULES:
-- Use SPECIFIC details from context (repo name, technologies, etc.)
-- Be concrete, not vague
-- Numbers and specifics beat general statements
-- Show deep understanding
-- Make readers want to DM you
+EXAMPLES:
+- "We chose Solana over Ethereum because..."
+- "The architecture uses X pattern which enables..."
+- "Performance improved by 40% after..."
+- "Built with [tech] which allows us to..."
 
-Generate the LinkedIn post. Do NOT include hashtags."""
+SECTION 5 - TACTICAL WISDOM (3-4 bullets):
+🎯 Specific takeaways - numbers, metrics, learnings
+
+SECTION 6 - AUTHORITY POSITIONING (2 lines):
+👑 Subtle, not braggy
+- "After [project], I now understand..."
+- "If you're building in [space], this is critical..."
+
+SECTION 7 - SOFT CTA (1-2 lines):
+🤝 Make them want to engage/DM
+- "Building something similar? What's your biggest blocker?"
+- "Curious what you'd prioritize in this architecture?"
+- "Have you hit this problem? How did you solve it?"
+
+---
+
+CREDIBILITY SIGNALS:
+✓ Specific project/company names (from context)
+✓ Concrete metrics (from context)
+✓ Technical terminology (correct usage)
+✓ Shows process, not just results
+✓ Mentions what didn't work too
+
+AUTHENTICITY RULES:
+✓ Sounds like a person, not ChatGPT
+✓ Shows real struggle, not just success
+✓ Vulnerable but strong
+✓ Specific details only they would know
+✓ Their unique perspective evident
+
+❌ Generic advice
+❌ Overuse of buzzwords
+❌ "I'm proud to announce"
+❌ Humble bragging
+❌ "In conclusion..."
+
+---
+
+NOW WRITE:
+
+Use specific details from the context.
+Make it a story, not a tutorial.
+Show expertise through examples, not claims.
+End with a question they'll want to answer.
+Make me feel like I'm missing out if I don't engage.
+
+START WRITING IMMEDIATELY."""
         
         return prompt.strip()
     

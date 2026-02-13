@@ -1,0 +1,8 @@
+{"asctime": "2026-02-14 01:38:15,524", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-14 01:38:39,807", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-14 01:38:46,342", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-14 01:38:48,109", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-14 01:38:52,048", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-14 01:38:53,659", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-14 01:38:56,156", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-14 01:39:26,169", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "Generation completed successfully | mode=advanced | duration_seconds=29.646074056625366 | tokens_used=1801 | timestamp=2026-02-14T01:39:26.167999", "filename": "logger.py", "lineno": 128}
