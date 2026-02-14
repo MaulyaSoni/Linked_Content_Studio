@@ -24,6 +24,26 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from core.generator import LinkedInGenerator
 from core.models import PostRequest, ContentType, Tone, Audience, GenerationMode
 
+# Quality chains for post improvement (lazy load to avoid import issues)
+try:
+    from chains.quality_chains import (
+        enforce_specificity,
+        score_post_quality,
+        generate_hook_options,
+        ground_in_context
+    )
+    QUALITY_CHAINS_AVAILABLE = True
+except ImportError as e:
+    logger = __import__('utils.logger', fromlist=['get_logger']).get_logger(__name__)
+    logger.warning(f"⚠️ Quality chains unavailable: {e}")
+    QUALITY_CHAINS_AVAILABLE = False
+    
+    # Provide no-op functions if import fails
+    def enforce_specificity(post): return post
+    def score_post_quality(post): return None
+    def generate_hook_options(post, context="", tone="", audience=""): return None
+    def ground_in_context(post, context): return post
+
 # UI imports
 from ui.components import UIComponents
 from ui.styles import setup_page_config, apply_custom_css
@@ -161,6 +181,54 @@ class LinkedInPostApp:
                 
                 # Generate post
                 response = self.generator.generate(request)
+                
+                # Apply quality improvements if enabled
+                if response.success and QUALITY_CHAINS_AVAILABLE:
+                    has_context = bool(response.context_sources)
+                    
+                    # Enforce specificity if enabled
+                    if advanced_options.get("enforce_specificity", True):
+                        try:
+                            with st.spinner("🔍 Enforcing specificity..."):
+                                improved_post = enforce_specificity(response.post)
+                                if improved_post and improved_post != response.post:
+                                    response.post = improved_post
+                                    self.logger.info("✅ Specificity enforcement applied")
+                        except Exception as e:
+                            self.logger.error(f"⚠️ Specificity enforcement failed: {e}")
+                    
+                    # Ground claims in context if enabled and context available
+                    if advanced_options.get("ground_claims", True) and has_context:
+                        try:
+                            with st.spinner("✓ Verifying claims against context..."):
+                                grounded_post = ground_in_context(response.post, "\n".join(response.context_sources))
+                                if grounded_post and grounded_post != response.post:
+                                    response.post = grounded_post
+                                    self.logger.info("✅ Context grounding applied")
+                        except Exception as e:
+                            self.logger.error(f"⚠️ Context grounding failed: {e}")
+                    
+                    # Generate hook options if enabled and simple mode
+                    if advanced_options.get("generate_hook_options", False) and mode == GenerationMode.SIMPLE:
+                        try:
+                            with st.spinner("🎣 Generating hook options..."):
+                                hook_options = generate_hook_options(response.post)
+                                if hook_options:
+                                    response.hook_options = hook_options
+                                    self.logger.info("✅ Hook options generated")
+                        except Exception as e:
+                            self.logger.error(f"⚠️ Hook generation failed: {e}")
+                    
+                    # Score post quality if enabled
+                    if advanced_options.get("show_quality_score", True):
+                        try:
+                            with st.spinner("📊 Scoring post quality..."):
+                                quality_score = score_post_quality(response.post)
+                                if quality_score:
+                                    response.quality_score = quality_score
+                                    self.logger.info("✅ Quality score calculated")
+                        except Exception as e:
+                            self.logger.error(f"⚠️ Quality scoring failed: {e}")
                 
                 # Update session state
                 st.session_state.current_response = response

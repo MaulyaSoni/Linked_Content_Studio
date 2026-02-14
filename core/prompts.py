@@ -26,7 +26,32 @@ CONTENT REQUEST:
 - Target Audience: {request.audience.value}
 - Max Length: {request.max_length} characters
 
-CRITICAL: You must follow this exact psychology formula:
+⚠️ CRITICAL ANTI-HALLUCINATION RULES - READ FIRST:
+
+🚫 STRICTLY FORBIDDEN - NEVER FABRICATE:
+  ❌ NO made-up statistics ("85% of people", "94% correlation")
+  ❌ NO invented percentages or correlations without source
+  ❌ NO fake research citations ("studies show", "experts say")
+  ❌ NO fabricated timelines or numbers not in the topic/context
+  ❌ NO specific claims that cannot be verified from provided information
+  
+✅ ONLY USE REAL, VERIFIABLE INFORMATION:
+  ✓ If you don't have specific numbers, use qualitative insights
+  ✓ Share principles and frameworks instead of fake data
+  ✓ Use "in my experience" or "I've found" for personal observations
+  ✓ Be informational through explanations, not made-up metrics
+  ✓ Write naturally as a human professional, not a content machine
+
+💡 INFORMATION WITHOUT FABRICATION:
+  • Focus on WHY and HOW, not invented statistics
+  • Share frameworks ("3 principles I use" vs "85% effectiveness")
+  • Use real examples from common experiences
+  • Provide value through insights, not fake numbers
+  • Write conversationally like explaining to a colleague
+
+---
+
+Now follow this exact psychology formula:
 
 SECTION 1 - THE HOOK (Lines 1-2):
 ⚡ START WITH A BOLD STATEMENT OR COUNTERINTUITIVE INSIGHT
@@ -43,43 +68,80 @@ DON'T USE WEAK HOOKS:
 ❌ "Let me share with you..."
 ❌ "I want to talk about..."
 
+⚠️ HOOK MUST BE HONEST:
+- Don't exaggerate or invent dramatic scenarios
+- Keep it natural and authentic to the topic
+- Sound like a real person, not clickbait
+
 SECTION 2 - THE STRUGGLE (Lines 3-5):
-🎭 Show relatable pain or confusion
+🎭 Show relatable pain or confusion - BE SPECIFIC BUT HONEST
 - What was the problem?
 - Why did it matter?
 - Who else is struggling with this?
 
-Make it SPECIFIC. Use numbers, timelines, concrete details.
+Make it SPECIFIC with REAL details (not fabricated).
 NOT: "I had problems"
-YES: "I lost 3 months and $15K before I figured it out"
+BETTER: "I struggled with this for months" or "This kept breaking in production"
+
+IF YOU HAVE REAL DATA from topic/context:
+  • Use actual numbers/metrics provided
+  • Use actual timelines mentioned
+  • Reference real consequences described
+  
+IF NO SPECIFIC DATA PROVIDED:
+  • Focus on the nature of the problem
+  • Describe the challenge qualitatively
+  • Use relatable scenarios ("every developer faces this")
+  • Share the emotional/professional impact
+  
+⚠️ NEVER INVENT NUMBERS TO SOUND MORE CREDIBLE
 
 SECTION 3 - THE TRANSFORMATION (Lines 6-8):
-💡 THE AHA MOMENT
+💡 THE AHA MOMENT - WITH ROOT CAUSE ANALYSIS
 - What changed?
-- What insight did you have?
+- EXPLAIN WHY it changed (root cause, not just "things got better")
 - How did it shift your perspective?
 
-Make it emotional but authentic.
+Make it emotional but GROUNDED IN REALITY.
 NOT: "Everything changed"
-YES: "The moment I realized X, everything became crystal clear"
+YES: "The moment I realized the real problem wasn't X, it was Y, everything became crystal clear"
+
+ADD ROOT CAUSES:
+If you found improvement, explain:
+  • Root cause #1 (with evidence)
+  • Root cause #2 (with evidence)  
+  • Root cause #3 (with evidence)
 
 SECTION 4 - THE TACTICAL VALUE (Lines 9-14):
-🎯 SPECIFIC, ACTIONABLE TAKEAWAYS
-Use bullet points with concrete details:
-• Include numbers (percentages, days, $)
-• Be specific (not generic advice)
-• Give real examples
-• Show results
+🎯 ACTIONABLE TAKEAWAYS WITH PRACTICAL HOW-TO DETAILS
+Use bullet points focused on REAL, IMPLEMENTABLE ADVICE:
 
-NOT:
-- Focus on goals
-- Be consistent
-- Never give up
+✅ PROVIDE VALUE THROUGH:
+• Frameworks and principles ("3 questions I ask before starting")
+• Step-by-step approaches ("First X, then Y, finally Z")
+• Specific actions (not "be consistent" → "review metrics every Monday")
+• Common patterns to watch for
+• Practical implementation guidance
 
-YES:
-- We cut response time from 4 days to 4 hours
-- It took exactly 21 days to see results
-- The top 3% of [role] all do this one thing
+NOT JUST WHAT, BUT HOW:
+❌ "Create open communication" 
+✅ "Dedicate 2 hours/week to listening sessions with your team"
+
+❌ "Be data-driven"
+✅ "Track 3 core metrics weekly to spot issues early"
+
+❌ "Study the topic"
+✅ "Understand the underlying principles before jumping to implementation"
+
+💡 MAKE IT INFORMATIONAL:
+  ☑ How to implement (specific steps)
+  ☑ Why it works (the reasoning)
+  ☑ When to apply it (context)
+  ☑ What to watch out for (pitfalls)
+  
+⚠️ ONLY include numbers if they're from the topic/context provided
+⚠️ Don't fabricate before/after metrics to sound impressive
+⚠️ Value comes from insights and frameworks, not fake data
 
 SECTION 5 - THE SOFT CTA (Last 2-3 lines):
 🤝 ENGAGEMENT (Not selling)
@@ -110,17 +172,30 @@ IF FOUNDERS: Business outcomes, revenue, growth, fundraising, hiring
 IF PROFESSIONALS: Career growth, work-life balance, leadership, industry trends
 IF ENTREPRENEURS: Hustling, bootstrapping, customer insights, mindset
 
-FORBIDDEN PATTERNS (These make posts sound AI):
+FORBIDDEN PATTERNS (These make posts sound AI or fabricated):
 ❌ "In today's world..."
 ❌ "As a [role], I believe..."
 ❌ "The key to success is..."
 ❌ "It's important to..."
 ❌ "When all is said and done..."
 ❌ "In conclusion..."
+❌ "Studies show that..." (unless citing real study)
+❌ "X% of people..." (unless from provided context)
+❌ "Research indicates..." (unless real source given)
+❌ "Experts say..." (vague, fabricated authority)
 ❌ Overuse of "and" - use short. Punchy. Sentences.
 ❌ Multiple emojis in a row
 ❌ ALL CAPS for emphasis
 ❌ "Feel free to reach out"
+
+WRITE LIKE A REAL PROFESSIONAL:
+✅ "In my experience..."
+✅ "I've noticed..."
+✅ "Here's what worked for me..."
+✅ "After working on this, I learned..."
+✅ "The approach I use is..."
+✅ Sound conversational and authentic
+✅ Share insights from real understanding
 
 ENGAGEMENT OPTIMIZATION:
 ✓ Questions at the end get 2x more engagement

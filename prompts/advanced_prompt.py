@@ -53,18 +53,30 @@ Use the context below to extract REAL insights (not summaries).
 📋 CONTEXT:
 {context_str}
 
-⚠️ CRITICAL RULES - AVOID AI CLICHÉS:
+⚠️ CRITICAL ANTI-HALLUCINATION & AUTHENTICITY RULES:
 
-❌ STRICTLY FORBIDDEN:
+🚫 STRICTLY FORBIDDEN - NEVER FABRICATE:
   • "As a seasoned leader/expert/professional"
   • "Hidden dangers", "game-changing", "revolutionary", "groundbreaking"
   • "Unlock", "the secret to", "Here's the good news"
   • Corporate buzzwords: "leverage", "synergy", "disrupt", "paradigm shift"
   • Marketing phrases: "transform your business", "next level"
-  • FAKE STATISTICS: No "85% of...", no invented percentages
+  • FAKE STATISTICS: No "85% of...", no invented percentages, no "94% correlation"
   • FABRICATED DATA: No made-up research, studies, or numbers
+  • INVENTED METRICS: No "improved by X%" unless in context
+  • FALSE EXPERTISE CLAIMS: No "studies show", "research indicates", "experts say"
   • Fake drama or clickbait headlines
   • Generic corporate speak
+  • Made-up before/after comparisons
+  • Exaggerated timelines or costs not in context
+
+✅ VERIFIED INFORMATION ONLY:
+  • ONLY use numbers/data explicitly mentioned in context below
+  • If no specific metrics provided, use qualitative insights
+  • Share frameworks and principles instead of fake statistics
+  • Write from genuine understanding, not fabricated authority
+  • Be informational through deep explanations, not invented proof
+  • Sound like a real person who built/studied this, not a marketing bot
 
 ✅ INSTEAD, write like lived experience:
 

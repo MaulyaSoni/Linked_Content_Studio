@@ -194,6 +194,7 @@ class UIComponents:
         """Render advanced generation options."""
         with st.expander("🔧 Advanced Options", expanded=False):
             
+            # Basic generation options
             col1, col2 = st.columns(2)
             
             with col1:
@@ -202,11 +203,45 @@ class UIComponents:
             
             with col2:
                 max_length = st.slider("Max Length", 500, 3000, 2000, 100)
+            
+            # Quality improvement options
+            st.markdown("---")
+            st.markdown("### 🎯 Quality Improvements")
+            
+            col3, col4 = st.columns(2)
+            
+            with col3:
+                enforce_specificity_flag = st.checkbox(
+                    "🎯 Enforce Specificity",
+                    value=True,
+                    help="Remove vague phrases and tie metrics to root causes"
+                )
+                show_quality_score = st.checkbox(
+                    "📊 Show Quality Score",
+                    value=True,
+                    help="Display quality metrics (clarity, specificity, engagement, credibility, actionability)"
+                )
+            
+            with col4:
+                generate_hook_options_flag = st.checkbox(
+                    "🎣 Generate Hook Options",
+                    value=False,
+                    help="Generate 3 hook options (curiosity, outcome, contrarian) for better engagement"
+                )
+                ground_claims = st.checkbox(
+                    "✓ Verify Claims",
+                    value=True,
+                    help="Ground claims in context to prevent hallucination of metrics"
+                )
         
         return {
             "include_hashtags": include_hashtags,
             "include_caption": include_caption,
-            "max_length": max_length
+            "max_length": max_length,
+            "enforce_specificity": enforce_specificity_flag,
+            "show_quality_score": show_quality_score,
+            "generate_hook_options": generate_hook_options_flag,
+            "ground_claims": ground_claims
         }
     
     @staticmethod
@@ -242,6 +277,56 @@ class UIComponents:
             st.metric("Mode", response.mode_used.title())
         with col3:
             st.metric("Quality", response.hook_strength.title())
+        
+        # Quality Score Section
+        if hasattr(response, 'quality_score') and response.quality_score:
+            st.markdown("---")
+            st.markdown("### 📊 Quality Analysis")
+            
+            score_data = response.quality_score
+            
+            # Display individual scores
+            if isinstance(score_data, dict):
+                col1, col2, col3 = st.columns(3)
+                
+                metrics = list(score_data.items())
+                for idx, (metric, value) in enumerate(metrics[:3]):
+                    with [col1, col2, col3][idx]:
+                        # Convert value to float and create a color indicator
+                        try:
+                            numeric_value = float(str(value).split('/')[0]) if '/' in str(value) else float(value)
+                            color = "🟢" if numeric_value >= 7 else "🟡" if numeric_value >= 5 else "🔴"
+                            st.metric(metric.replace('_', ' ').title(), f"{color} {value}")
+                        except:
+                            st.metric(metric.replace('_', ' ').title(), value)
+                
+                # Display remaining scores if any
+                if len(metrics) > 3:
+                    col1, col2 = st.columns(2)
+                    for idx, (metric, value) in enumerate(metrics[3:]):
+                        with [col1, col2][idx % 2]:
+                            try:
+                                numeric_value = float(str(value).split('/')[0]) if '/' in str(value) else float(value)
+                                color = "🟢" if numeric_value >= 7 else "🟡" if numeric_value >= 5 else "🔴"
+                                st.metric(metric.replace('_', ' ').title(), f"{color} {value}")
+                            except:
+                                st.metric(metric.replace('_', ' ').title(), value)
+        
+        # Hook Options Section
+        if hasattr(response, 'hook_options') and response.hook_options:
+            st.markdown("---")
+            st.markdown("### 🎣 Hook Options")
+            
+            hook_data = response.hook_options
+            if isinstance(hook_data, dict):
+                selected_hook = st.radio(
+                    "Select a hook to use:",
+                    options=list(hook_data.keys()),
+                    format_func=lambda x: f"**{x.title()}** - {hook_data[x][:60]}..."
+                )
+                
+                if selected_hook:
+                    st.info(f"✨ **{selected_hook.title()} Hook:**\n\n{hook_data[selected_hook]}")
         
         # Post content
         full_post = response.post

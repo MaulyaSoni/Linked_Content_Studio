@@ -115,3 +115,47 @@ class LLMProvider:
         except Exception as e:
             logger.error(f"LLM connectivity test failed: {e}")
             return False
+
+
+# ============================================================================
+# SINGLETON PROVIDER INSTANCES
+# ============================================================================
+
+# Default provider with standard settings
+_default_provider: Optional[LLMProvider] = None
+
+# Deterministic provider with temperature=0 for consistent outputs
+_deterministic_provider: Optional[LLMProvider] = None
+
+
+def get_llm() -> ChatGroq:
+    """Get default LLM instance with standard temperature (0.7).
+    
+    Returns:
+        ChatGroq instance configured for creative/varied outputs
+    
+    Lazy initialization - only creates on first call.
+    """
+    global _default_provider
+    if _default_provider is None:
+        config = GenerationConfig()
+        _default_provider = LLMProvider(config)
+    return _default_provider.llm
+
+
+def get_llm_deterministic() -> ChatGroq:
+    """Get deterministic LLM instance with temperature=0.
+    
+    Used for quality checking, scoring, and structured outputs
+    where consistency is more important than creativity.
+    
+    Returns:
+        ChatGroq instance configured for deterministic outputs
+    
+    Lazy initialization - only creates on first call.
+    """
+    global _deterministic_provider
+    if _deterministic_provider is None:
+        config = GenerationConfig(temperature=0)
+        _deterministic_provider = LLMProvider(config)
+    return _deterministic_provider.llm

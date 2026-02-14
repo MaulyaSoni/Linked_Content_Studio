@@ -136,6 +136,12 @@ class PostResponse:
     estimated_engagement: str = "medium"      # low/medium/high
     hook_strength: str = "good"                # weak/good/strong
     context_quality: float = 0.0               # 0-1 score
+    hook_options: Dict[str, str] = field(
+        default_factory=dict
+    )                                          # Generated hook options: {style: hook_text}
+    quality_score: Dict[str, Any] = field(
+        default_factory=dict
+    )                                          # Quality metrics: {dimension: score}
     
     # ---- PERFORMANCE METRICS ----
     generation_time: float = 0.0               # Seconds taken

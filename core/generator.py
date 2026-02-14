@@ -349,61 +349,74 @@ What’s your experience with {request.topic}?"""
         tone = getattr(request.tone, 'value', str(request.tone)) if hasattr(request.tone, 'value') else str(request.tone)
         audience = getattr(request.audience, 'value', str(request.audience)) if hasattr(request.audience, 'value') else str(request.audience)
         
-        refinement_prompt = f"""Rewrite the following LinkedIn post to sound more human, natural, and authentic.
+        refinement_prompt = f"""Rewrite this LinkedIn post to sound more natural, human, and informational.
 
-ORIGINAL POST:
-{original_post}
+                ORIGINAL POST:
+                {original_post}
 
-✅ RULES:
-- Keep the core message and insights
-- Remove corporate tone and generic marketing phrases
-- Remove exaggerated claims
-- Make the hook punchy (max 12 words, no clickbait)
-- Add line breaks for mobile readability (1-2 line paragraphs)
-- Use bullet points (•) for lists if helpful
-- End with natural question, not salesy CTA
-- Tone: {tone}
-- Audience: {audience}
+                ⚠️ CRITICAL ANTI-HALLUCINATION RULES:
+                🚫 NEVER add fake statistics, percentages, or invented research claims
+                🚫 NEVER fabricate "studies show" or "X% of people" claims
+                🚫 NEVER add numbers or metrics not in the original
+                ✅ Keep original facts intact, just improve the natural flow
+                ✅ Add value through clearer explanations and frameworks
+                ✅ Write like a knowledgeable professional, not a content machine
 
-❌ STRICTLY FORBIDDEN:
-- Do NOT add fake statistics or percentages
-- Do NOT use "game-changing", "unlock", "the secret to", "revolutionary"
-- Do NOT use "Here's the good news" or "The truth is"
-- Do NOT add corporate buzzwords
-- Do NOT explain what you changed
-- Do NOT add meta-commentary like "Refinements made:"
-- Do NOT include labels like "POST:" or "HASHTAGS:"
+                ✅ IMPROVEMENT RULES:
+                - Keep the core message and verified insights
+                - Remove corporate tone and generic marketing phrases  
+                - Remove any exaggerated or unverifiable claims in original
+                - Make the hook engaging but honest (max 12 words, no clickbait)
+                - Add line breaks for mobile readability (1-2 line paragraphs)
+                - Use bullet points (•) for lists if helpful
+                - End with genuine question, not salesy CTA
+                - Sound conversational like explaining to a colleague
+                - Be informational through clear explanations, not fake metrics
+                - Tone: {tone}
+                - Audience: {audience}
 
-🎯 CRITICAL: Return ONLY the final rewritten post.
-No analysis. No explanations. No headings.
-Just write the post naturally like a human would."""
+                ❌ STRICTLY FORBIDDEN:
+                - Do NOT add fake statistics or percentages
+                - Do NOT use "game-changing", "unlock", "the secret to", "revolutionary"
+                - Do NOT use "Here's the good news" or "The truth is"
+                - Do NOT add corporate buzzwords
+                - Do NOT explain what you changed
+                - Do NOT add meta-commentary like "Refinements made:" or "Changes:"
+                - Do NOT include labels like "POST:" or "HASHTAGS:"
+                - Do NOT add "studies show" or "research indicates" without real sources
 
-        try:
-            result = self.llm.generate(refinement_prompt)
-            
-            if not result.success or not result.content:
-                # Fallback to original
-                return PostResponse(
-                    success=True,
-                    post=original_post,
-                    mode_used="refinement_failed"
-                )
-            
-            post, hashtags, caption = self._parse_llm_response(result.content)
-            
-            return PostResponse(
-                success=True,
-                post=post if post else original_post,
-                hashtags=hashtags,
-                caption=caption,
-                mode_used="refined",
-                tokens_used=result.tokens_used
-            )
-            
-        except Exception as e:
-            self.logger.warning(f"⚠️ Refinement failed: {e}, using original")
-            return PostResponse(
-                success=True,
-                post=original_post,
-                mode_used="refinement_error"
-            )
+                🎯 OUTPUT REQUIREMENT:
+                Return ONLY the final rewritten post.
+                No analysis. No explanations. No headings. No meta-commentary.
+                Just write the post naturally as if you were the author.
+
+                        try:
+                            result = self.llm.generate(refinement_prompt)
+                            
+                            if not result.success or not result.content:
+                                # Fallback to original
+                                return PostResponse(
+                                    success=True,
+                                    post=original_post,
+                                    mode_used="refinement_failed"
+                                )
+                            
+                            post, hashtags, caption = self._parse_llm_response(result.content)
+                            
+                            return PostResponse(
+                                success=True,
+                                post=post if post else original_post,
+                                hashtags=hashtags,
+                                caption=caption,
+                                mode_used="refined",
+                                tokens_used=result.tokens_used
+                            )
+                            
+                        except Exception as e:
+                            self.logger.warning(f"⚠️ Refinement failed: {e}, using original")
+                            return PostResponse(
+                                success=True,
+                                post=original_post,
+                                mode_used="refinement_error"
+                            )
+                """

@@ -25,6 +25,15 @@ def build_simple_prompt(request: PostRequest) -> str:
     prompt = f"""
 You are a high-performing LinkedIn creator with 100K+ followers who writes scroll-stopping content.
 
+⚠️ CRITICAL ANTI-HALLUCINATION RULES:
+🚫 NEVER fabricate statistics, percentages, or research claims
+🚫 NEVER invent "studies show" or "research indicates" without real sources
+🚫 NEVER make up specific numbers not provided in the topic/context
+✅ ONLY use data explicitly mentioned in the topic/context below
+✅ Provide value through frameworks, insights, and practical advice
+✅ Write like a real professional sharing genuine experience
+✅ Be informational through explanations and principles, not fake metrics
+
 Your job is to write a LinkedIn post that:
 - Feels authentically human, not AI-generated
 - Uses short, punchy lines for mobile readability  
@@ -32,15 +41,18 @@ Your job is to write a LinkedIn post that:
 - Delivers genuine insights that professionals care about
 - Attracts {audience_name.lower()}
 - Drives meaningful engagement and conversation
+- SOUNDS NATURAL like a conversation with a smart colleague
 
 CRITICAL WRITING RULES:
 • Max 1-2 sentences per paragraph (mobile-first)
 • Use strategic whitespace for visual breathing room
-• Strong hook in the first line - no boring openers
+• Strong hook in the first line - no boring openers, but keep it honest
 • NO clichés like "In today's fast-paced world" or "I'm excited to announce"
 • NO generic corporate speak or buzzwords
-• Conversational but professional tone
-• Slightly bold opinions but not arrogant
+• NO fabricated statistics to sound authoritative
+• Conversational but professional tone - like explaining to a colleague
+• Share real insights, frameworks, and principles
+• Slightly bold opinions but not arrogant or exaggerated
 • Make every line count - cut the fluff
 
 POST STRUCTURE THAT CONVERTS:
@@ -98,26 +110,37 @@ CONTEXT TO WORK WITH:
 {context.content}
 
 WRITING APPROACH:
-Instead of summarizing the context, extract the most interesting insights and present them in a way that:
-- Highlights why this matters to professionals
-- Shows the bigger picture implications  
-- Provides actionable takeaways
-- Sparks curiosity and discussion
+Extract genuine insights from the context and present them naturally:
+- Highlight why this matters to professionals
+- Show the bigger picture implications  
+- Provide actionable frameworks and principles
+- Share practical how-to guidance
+- Spark curiosity and discussion
+- Write like you're explaining this to a colleague over coffee
+
+⚠️ FACT-CHECK REQUIREMENTS:
+• ONLY use specific data/numbers if they appear in the context below
+• If context lacks numbers, provide value through frameworks and insights
+• Never fabricate percentages or statistics to sound credible
+• Ground every claim in the context provided or general professional knowledge
+• Be informational through explanation, not invented metrics
 
 LINKEDIN SUCCESS FORMULA:
-• Start with a hook that stops the scroll
+• Start with an authentic hook that stops the scroll (no exaggeration)
 • Extract 1-2 key insights from the context
 • Make it relevant to your audience's daily challenges
+• Explain the WHY and HOW, not just the WHAT
+• Share practical approaches and frameworks
 • End with a question that drives engagement
 • Use short lines and strategic whitespace
-• Sound human, not like a content bot
+• Sound like a knowledgeable human, not a content bot
 
 TARGET DETAILS:
 - Tone: {tone_name}
 - Audience: {audience_name}
 - Topic: {request.topic}
 
-CRITICAL: Don't just summarize the context. Find the golden nuggets that professionals would find valuable and present them in an engaging way.
+CRITICAL: Don't just summarize. Find valuable insights and explain them naturally, as if you're teaching a smart colleague. Use ONLY verified information from the context.
 
 FORMAT YOUR RESPONSE AS:
 
