@@ -404,3 +404,204 @@ class UIComponents:
             return False
         
         return True
+
+
+# ============================================================================
+# HACKATHON SECTION - Standalone Function
+# ============================================================================
+
+def render_hackathon_section():
+    """Render hackathon/competition input section"""
+    
+    from core.models import HackathonProjectRequest, HackathonAchievement, HackathonType
+    
+    st.markdown("## 🏆 Hackathon & Competition Post")
+    st.markdown("Create an engaging post about your hackathon/competition experience")
+    
+    # Basic Information
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        hackathon_name = st.text_input(
+            "Hackathon/Competition Name *",
+            placeholder="e.g., Odoo X Adani Hackathon, HackUVA 2024",
+            help="The official name of the hackathon or competition"
+        )
+        
+        project_name = st.text_input(
+            "Your Project Name *",
+            placeholder="e.g., WaterFlow, GreenRoute",
+            help="The name of your solution/project"
+        )
+    
+    with col2:
+        team_size = st.slider(
+            "Team Size",
+            min_value=1,
+            max_value=10,
+            value=4,
+            help="How many people were on your team?"
+        )
+        
+        completion_time = st.selectbox(
+            "Time Spent",
+            ["24 hours", "36 hours", "48 hours", "72 hours"],
+            help="How long was the hackathon?"
+        )
+    
+    # Achievement Level
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        achievement = st.selectbox(
+            "Achievement Level",
+            ["Participant", "Top 10", "Top 5", "Runner-up", "Winner", "Special Mention"],
+            help="What was your final achievement?"
+        )
+    
+    with col2:
+        hackathon_type = st.selectbox(
+            "Hackathon Type",
+            ["General", "AI/ML", "Web Development", "Mobile", "Sustainability", "Healthcare", "FinTech"],
+            help="What was the focus of this hackathon?"
+        )
+    
+    # Problem Statement
+    st.markdown("### 📋 Problem & Solution")
+    
+    problem = st.text_area(
+        "What problem does your project solve? *",
+        placeholder="e.g., City water management faces challenges like aging infrastructure, inefficient supply chains, and lack of real-time monitoring affecting millions worldwide.",
+        height=100,
+        help="Be specific about the real-world problem"
+    )
+    
+    solution = st.text_area(
+        "How does your solution work? *",
+        placeholder="e.g., We built an ML model integrated with MERN stack that detects anomalies in water usage patterns and enables proactive maintenance.",
+        height=100,
+        help="Explain your technical approach"
+    )
+    
+    # Tech Stack & Features
+    st.markdown("### 💻 Tech Stack & Features")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        tech_input = st.text_input(
+            "Technologies Used (comma-separated)",
+            placeholder="React, Node.js, MongoDB, Python, ML, Google Maps API",
+            help="List all major tech used in your project"
+        )
+        tech_stack = [t.strip() for t in tech_input.split(",") if t.strip()]
+    
+    with col2:
+        team_members_input = st.text_input(
+            "Team Member Names (comma-separated, optional)",
+            placeholder="Alice, Bob, Charlie",
+            help="Names of your team members to credit them"
+        )
+        team_members = [m.strip() for m in team_members_input.split(",") if m.strip()]
+    
+    features_input = st.text_area(
+        "Key Features (one per line)",
+        placeholder="Real-time anomaly detection\nPattern recognition using ML\nProactive maintenance alerts\nInteractive dashboard",
+        height=80,
+        help="Main features of your solution"
+    )
+    key_features = [f.strip() for f in features_input.split("\n") if f.strip()]
+    
+    # Personal Journey & Learnings
+    st.markdown("### 🌟 Your Journey & Learnings")
+    
+    personal_journey = st.text_area(
+        "Your Personal Journey *",
+        placeholder="e.g., Finally, after all these years of learning, building, and dreaming… I participated in my first hackathon!",
+        height=80,
+        help="The emotional/personal aspect of your journey"
+    )
+    
+    learnings_input = st.text_area(
+        "Key Learnings (one per line)",
+        placeholder="Data-driven decision making with ML is crucial\nGreat teams move fast with clear communication\nConstraints spark innovation and creativity",
+        height=100,
+        help="Important lessons from this experience"
+    )
+    key_learnings = [l.strip() for l in learnings_input.split("\n") if l.strip()]
+    
+    # Tone and Audience
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        tone = st.selectbox(
+            "Tone",
+            ["Thoughtful", "Enthusiastic", "Bold", "Casual"],
+            help="How should the post feel?"
+        )
+    
+    with col2:
+        audience = st.selectbox(
+            "Target Audience",
+            ["Developers", "Founders", "Professionals", "General Tech Community"],
+            help="Who should this post resonate with?"
+        )
+    
+    # Create request object
+    if st.button("✨ Generate Hackathon Post", type="primary", use_container_width=True):
+        
+        # Validate required fields
+        if not hackathon_name or not project_name or not problem or not solution:
+            st.error("❌ Please fill in all required fields (marked with *)")
+            return None
+        
+        if not personal_journey:
+            st.error("❌ Please share your personal journey - it makes the post more authentic!")
+            return None
+        
+        try:
+            # Map string values to enums
+            achievement_map = {
+                "Participant": HackathonAchievement.PARTICIPANT,
+                "Top 10": HackathonAchievement.TOP_10,
+                "Top 5": HackathonAchievement.TOP_5,
+                "Runner-up": HackathonAchievement.RUNNER_UP,
+                "Winner": HackathonAchievement.WINNER,
+                "Special Mention": HackathonAchievement.SPECIAL_MENTION,
+            }
+            
+            type_map = {
+                "General": HackathonType.GENERAL,
+                "AI/ML": HackathonType.AI_ML,
+                "Web Development": HackathonType.WEB_DEV,
+                "Mobile": HackathonType.MOBILE,
+                "Sustainability": HackathonType.SUSTAINABILITY,
+                "Healthcare": HackathonType.HEALTHCARE,
+                "FinTech": HackathonType.FINTECH,
+            }
+            
+            request = HackathonProjectRequest(
+                hackathon_name=hackathon_name,
+                project_name=project_name,
+                team_size=team_size,
+                team_members=team_members,
+                problem_statement=problem,
+                solution_description=solution,
+                tech_stack=tech_stack,
+                key_features=key_features,
+                completion_time_hours=int(completion_time.split()[0]),
+                achievement=achievement_map[achievement],
+                personal_journey=personal_journey,
+                key_learnings=key_learnings,
+                tone=tone.lower(),
+                audience=audience.lower().replace(" tech community", "").replace("general ", "general"),
+                hackathon_type=type_map[hackathon_type]
+            )
+            
+            return request
+            
+        except Exception as e:
+            st.error(f"❌ Error: {str(e)}")
+            return None
+    
+    return None

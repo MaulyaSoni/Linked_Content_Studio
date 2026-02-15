@@ -78,3 +78,4 @@
 {"asctime": "2026-02-14 13:57:44,723", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 Context grounding applied", "filename": "logger.py", "lineno": 130}
 {"asctime": "2026-02-14 13:57:45,447", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 Quality score calculated", "filename": "logger.py", "lineno": 130}
 {"asctime": "2026-02-14 13:57:45,451", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "Generation completed successfully | mode=advanced | duration_seconds=183.14883875846863 | tokens_used=1407 | timestamp=2026-02-14T13:57:45.451573", "filename": "logger.py", "lineno": 128}
+{"asctime": "2026-02-14 15:40:27,888", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}

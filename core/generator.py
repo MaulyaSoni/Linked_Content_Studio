@@ -420,3 +420,169 @@ What’s your experience with {request.topic}?"""
                                 mode_used="refinement_error"
                             )
                 """
+        
+        try:
+            result = self.llm.generate(refinement_prompt)
+            
+            if not result.success or not result.content:
+                # Fallback to original
+                return PostResponse(
+                    success=True,
+                    post=original_post,
+                    mode_used="refinement_failed"
+                )
+            
+            post, hashtags, caption = self._parse_llm_response(result.content)
+            
+            return PostResponse(
+                success=True,
+                post=post if post else original_post,
+                hashtags=hashtags,
+                caption=caption,
+                mode_used="refined",
+                tokens_used=result.tokens_used
+            )
+            
+        except Exception as e:
+            self.logger.warning(f"⚠️ Refinement failed: {e}, using original")
+            return PostResponse(
+                success=True,
+                post=original_post,
+                mode_used="refinement_error"
+            )
+
+    # ===============================
+    # HACKATHON POST GENERATION
+    # ===============================
+
+    def generate_hackathon_post(self, request):
+        """
+        Generate a hackathon/competition post.
+        
+        Args:
+            request: HackathonProjectRequest object
+            
+        Returns:
+            HackathonPostResponse with generated post
+        """
+        import time
+        from prompts.hackathon_prompt import HackathonPromptBuilder
+        from core.models import HackathonPostResponse
+        
+        start_time = time.time()
+        
+        try:
+            # Validate request
+            request.validate()
+            
+            self.logger.info(f"🏆 Generating hackathon post: {request.project_name}")
+            
+            # Build the prompt
+            prompt = HackathonPromptBuilder.build_hackathon_prompt(
+                hackathon_name=request.hackathon_name,
+                project_name=request.project_name,
+                problem_statement=request.problem_statement,
+                solution_description=request.solution_description,
+                tech_stack=request.tech_stack,
+                key_features=request.key_features,
+                team_size=request.team_size,
+                completion_time_hours=request.completion_time_hours,
+                achievement=request.achievement.value,
+                personal_journey=request.personal_journey,
+                key_learnings=request.key_learnings,
+                tone=request.tone,
+                audience=request.audience,
+                max_length=request.max_length
+            )
+            
+            # Generate with LLM
+            self.logger.info("🤖 Calling LLM for post generation...")
+            
+            llm_result = self.llm.generate(
+                prompt=prompt,
+                system_prompt="You are an expert at writing compelling hackathon posts that inspire developers and tech communities. Your posts are authentic, specific, and emotionally resonant."
+            )
+            
+            if not llm_result.success:
+                self.logger.error(f"❌ LLM generation failed: {llm_result.error_message}")
+                return HackathonPostResponse(
+                    success=False,
+                    error_message=llm_result.error_message,
+                    mode_used="advanced",
+                    achievement_level=request.achievement.value
+                )
+            
+            # Get the generated post
+            post_text = llm_result.content.strip()
+            
+            # Generate relevant hashtags
+            hashtags = self._generate_hackathon_hashtags(
+                request.hackathon_name,
+                request.project_name,
+                request.tech_stack,
+                request.achievement
+            )
+            
+            # Calculate metrics
+            generation_time = time.time() - start_time
+            
+            self.logger.info(f"✅ Post generated in {generation_time:.1f}s")
+            
+            # Return response
+            return HackathonPostResponse(
+                success=True,
+                post=post_text,
+                hashtags=hashtags,
+                mode_used="advanced",
+                generation_time=generation_time,
+                context_sources=["Hackathon Project Details"],
+                achievement_level=request.achievement.value,
+                estimated_reach="high" if request.achievement.value in ["winner", "runner_up", "top_5"] else "medium"
+            )
+            
+        except Exception as e:
+            self.logger.error(f"❌ Hackathon generation error: {e}", exc_info=True)
+            from core.models import HackathonPostResponse
+            return HackathonPostResponse(
+                success=False,
+                error_message=f"Generation failed: {str(e)}",
+                mode_used="advanced"
+            )
+
+    def _generate_hackathon_hashtags(self, hackathon_name: str, project_name: str, tech_stack: list, achievement) -> str:
+        """Generate relevant hashtags for hackathon posts"""
+        
+        try:
+            hashtags = []
+            
+            # Hackathon name hashtag
+            hackathon_words = hackathon_name.split()[:2]
+            for word in hackathon_words:
+                hashtags.append(f"#{word}")
+            
+            # Achievement hashtags
+            achievement_map = {
+                "winner": "#HackathonWinner",
+                "runner_up": "#RunnerUp",
+                "top_5": "#Top5",
+                "top_10": "#Top10",
+                "special_mention": "#SpecialMention",
+                "participant": "#HackathonJourney"
+            }
+            
+            achievement_tag = achievement_map.get(achievement.value if hasattr(achievement, 'value') else achievement, "#HackathonJourney")
+            hashtags.append(achievement_tag)
+            
+            # Tech stack hashtags
+            for tech in tech_stack[:2]:
+                tech_tag = tech.replace(" ", "").replace(".", "")
+                hashtags.append(f"#{tech_tag}")
+            
+            # Generic hackathon hashtags
+            hashtags.extend(["#Innovation", "#TeamWork", "#BuildTogether"])
+            
+            return " ".join(hashtags)
+            
+        except Exception as e:
+            self.logger.warning(f"Hashtag generation failed: {e}")
+            return "#Hackathon #Innovation #TeamWork"

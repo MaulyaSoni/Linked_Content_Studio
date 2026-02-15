@@ -111,8 +111,85 @@ class LinkedInPostApp:
             st.info("💡 Make sure you have GROQ_API_KEY set in your .env file")
             return
         
+        # Post Type Selection (Top Level)
+        st.markdown("### 📝 Select Post Type")
+        post_type = st.radio(
+            "Choose what you want to create:",
+            [
+                "🚀 SIMPLE Topic",
+                "📊 ADVANCED GitHub",
+                "🏆 HACKATHON Project",
+            ],
+            horizontal=True,
+            label_visibility="collapsed"
+        )
+        
+        st.markdown("---")
+        
+        # Handle Hackathon separately
+        if post_type == "🏆 HACKATHON Project":
+            from ui.components import render_hackathon_section
+            
+            hackathon_request = render_hackathon_section()
+            
+            if hackathon_request:
+                with st.spinner("🚀 Creating your hackathon story..."):
+                    start_time = time.time()
+                    
+                    response = self.generator.generate_hackathon_post(hackathon_request)
+                    elapsed = time.time() - start_time
+                    
+                    st.markdown("---")
+                    
+                    if response.success:
+                        st.success("✅ Post generated successfully!")
+                        
+                        # Display the post
+                        st.markdown("### 📱 Your Post")
+                        st.code(response.post, language="markdown")
+                        
+                        # Copy buttons
+                        col1, col2, col3 = st.columns(3)
+                        with col1:
+                            if st.button("📋 Copy Post", use_container_width=True):
+                                st.info("Post copied! (Paste in LinkedIn)")
+                        
+                        # Display hashtags
+                        if response.hashtags:
+                            st.markdown("### #️⃣ Suggested Hashtags")
+                            st.code(response.hashtags)
+                            
+                            with col2:
+                                if st.button("📋 Copy Hashtags", use_container_width=True):
+                                    st.info("Hashtags copied!")
+                        
+                        # Display metrics
+                        st.markdown("---")
+                        st.markdown("### 📊 Generation Metrics")
+                        
+                        col1, col2, col3, col4 = st.columns(4)
+                        with col1:
+                            st.metric("⏱️ Time", f"{elapsed:.1f}s")
+                        with col2:
+                            st.metric("🏆 Achievement", response.achievement_level.upper())
+                        with col3:
+                            st.metric("📊 Reach", response.estimated_reach.upper())
+                        with col4:
+                            st.metric("✨ Mode", "HACKATHON")
+                        
+                        # Session state for feedback
+                        st.session_state.generation_count += 1
+                        
+                    else:
+                        st.error(f"❌ Generation failed: {response.error_message}")
+            
+            return  # Exit early for hackathon posts
+        
+        # Regular flow for SIMPLE and ADVANCED modes
+        mode = GenerationMode.SIMPLE if post_type == "🚀 SIMPLE Topic" else GenerationMode.ADVANCED
+        
         # Generation mode
-        mode = UIComponents.render_mode_selector()
+        # mode = UIComponents.render_mode_selector()  # Commented out - now set by post_type
         
         # Content type
         content_type = UIComponents.render_content_type_selector()

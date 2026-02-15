@@ -259,3 +259,92 @@ def get_audiences() -> Dict[str, str]:
         Audience.TECH_LEADERS.value: "⚡ Tech Leaders",
         Audience.GENERAL.value: "🌍 General Audience",
     }
+
+
+# ============================================================================
+# HACKATHON-SPECIFIC ENUMS
+# ============================================================================
+
+class HackathonAchievement(Enum):
+    """Achievement levels for hackathons"""
+    PARTICIPANT = "participant"
+    TOP_10 = "top_10"
+    TOP_5 = "top_5"
+    RUNNER_UP = "runner_up"
+    WINNER = "winner"
+    SPECIAL_MENTION = "special_mention"
+
+
+class HackathonType(Enum):
+    """Types of hackathons"""
+    AI_ML = "ai_ml"
+    WEB_DEV = "web_dev"
+    MOBILE = "mobile"
+    SUSTAINABILITY = "sustainability"
+    HEALTHCARE = "healthcare"
+    FINTECH = "fintech"
+    DATASCIENCE = "datascience"
+    GENERAL = "general"
+
+
+# ============================================================================
+# HACKATHON REQUEST & RESPONSE
+# ============================================================================
+
+@dataclass
+class HackathonProjectRequest:
+    """Request data for hackathon/competition post generation"""
+    
+    # ---- HACKATHON BASICS ----
+    hackathon_name: str                        # e.g., "Odoo X Adani Hackathon"
+    project_name: str                          # e.g., "WaterFlow"
+    hackathon_type: HackathonType = HackathonType.GENERAL
+    
+    # ---- TEAM INFO ----
+    team_size: int = 4                         # Number of team members (1-10)
+    team_members: List[str] = field(default_factory=list)  # Names of members
+    your_role: str = "Developer"               # Your role in the team
+    
+    # ---- PROJECT DETAILS ----
+    problem_statement: str = ""                # What problem does it solve?
+    solution_description: str = ""             # How does your solution work?
+    tech_stack: List[str] = field(default_factory=list)  # ["React", "Node.js", etc]
+    key_features: List[str] = field(default_factory=list)  # Features of the project
+    
+    # ---- RESULTS & ACHIEVEMENT ----
+    achievement: HackathonAchievement = HackathonAchievement.PARTICIPANT
+    completion_time_hours: int = 24            # 24, 36, or 48 hours
+    results_metrics: str = ""                  # e.g., "Built MVP in 24 hours"
+    
+    # ---- EMOTIONAL ELEMENTS ----
+    personal_journey: str = ""                 # "Finally, after years..."
+    key_learnings: List[str] = field(default_factory=list)  # What you learned
+    growth_moment: str = ""                    # Key realization from experience
+    
+    # ---- GENERATION SETTINGS ----
+    tone: str = "thoughtful"                   # thoughtful, enthusiastic, bold, casual
+    audience: str = "developers"               # developers, founders, professionals
+    max_length: int = 3000
+    
+    def validate(self):
+        """Validate request"""
+        if not self.hackathon_name:
+            raise ValueError("Hackathon name is required")
+        if not self.project_name:
+            raise ValueError("Project name is required")
+        if self.team_size < 1 or self.team_size > 10:
+            raise ValueError("Team size must be between 1 and 10")
+        if not self.problem_statement:
+            raise ValueError("Problem statement is required")
+
+
+@dataclass
+class HackathonPostResponse(PostResponse):
+    """Response for hackathon post generation"""
+    
+    # All fields from PostResponse, plus:
+    achievement_level: str = "participant"     # Winner, Top 5, etc
+    estimated_reach: str = "medium"            # low, medium, high
+    project_showcase: str = ""                 # The technical section
+    team_story: str = ""                       # The team collaboration section
+    impact_statement: str = ""                 # The "what's next" section
