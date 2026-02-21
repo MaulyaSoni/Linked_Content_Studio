@@ -3,13 +3,16 @@ LinkedIn Content Generator - Core Brain
 Clean, production-ready architecture.
 """
 
-from typing import Dict, List
+from typing import Dict, List, Optional
 from dataclasses import dataclass
 from datetime import datetime
 import logging
 
 from .prompts import PromptBuilder
-from .models import PostRequest, PostResponse, GenerationMode
+from .models import (
+    PostRequest, PostResponse, GenerationMode,
+    MultiModalInput, AgenticWorkflowRequest, AgenticWorkflowResponse,
+)
 from .rag import RAGEngine
 from .llm import LLMProvider
 
@@ -467,8 +470,7 @@ What’s your experience with {request.topic}?"""
         """
         import time
         from prompts.hackathon_prompt import HackathonPromptBuilder
-        from core.models import HackathonPostResponse
-        
+        from core.models import HackathonPostResponse        
         start_time = time.time()
         
         try:
@@ -586,3 +588,140 @@ What’s your experience with {request.topic}?"""
         except Exception as e:
             self.logger.warning(f"Hashtag generation failed: {e}")
             return "#Hackathon #Innovation #TeamWork"
+
+    # ===============================
+    # AGENTIC AI CONTENT STUDIO
+    # ===============================
+
+    def generate_with_agents(
+        self,
+        input_data: "MultiModalInput",
+        status_callback=None,
+    ) -> "AgenticWorkflowResponse":
+        """
+        Run the full 6-agent agentic workflow.
+
+        Args:
+            input_data: MultiModalInput with text/images/documents/URLs
+            status_callback: Optional callable(WorkflowStatus) for real-time UI updates
+
+        Returns:
+            AgenticWorkflowResponse with 3 variants + full intelligence
+        """
+        from agents.agent_orchestrator import AgentOrchestrator
+        from core.models import AgenticWorkflowResponse
+
+        if not input_data.has_input():
+            return AgenticWorkflowResponse(
+                success=False,
+                error_message="No input provided. Add text, images, documents, or URLs.",
+            )
+
+        try:
+            # Lazy-init orchestrator with current LLM
+            orchestrator = AgentOrchestrator(
+                llm_provider=self.llm if self.llm_available else None,
+                status_callback=status_callback,
+            )
+
+            user_input = {
+                "text": input_data.text,
+                "image_paths": input_data.image_paths,
+                "document_paths": input_data.document_paths,
+                "urls": input_data.urls,
+                "past_posts": input_data.past_posts,
+                "tone": input_data.tone,
+                "audience": input_data.audience,
+            }
+
+            result = orchestrator.execute_workflow(user_input)
+
+            return AgenticWorkflowResponse(
+                success=result.success,
+                variants=result.variants,
+                hashtags=result.hashtags,
+                best_variant=result.best_variant,
+                strategy=result.strategy,
+                research=result.research,
+                brand_feedback=result.brand_feedback,
+                optimization=result.optimization,
+                overall_recommendations=result.overall_recommendations,
+                total_time=result.total_time,
+                agents_run=result.agents_run,
+                error_message=result.error_message,
+            )
+
+        except Exception as exc:
+            self.logger.error(f"❌ Agentic workflow failed: {exc}", exc_info=True)
+            return AgenticWorkflowResponse(
+                success=False,
+                error_message=f"Agentic workflow failed: {str(exc)}",
+            )
+
+    def generate_and_post(
+        self,
+        input_data: "MultiModalInput",
+        variant_key: str = "storyteller",
+        status_callback=None,
+    ) -> "AgenticWorkflowResponse":
+        """
+        Generate posts with agents, then automatically post the best variant to LinkedIn.
+        """
+        from tools.linkedin_poster import LinkedInPoster
+
+        response = self.generate_with_agents(input_data, status_callback)
+        if not response.success:
+            return response
+
+        post_text = response.variants.get(variant_key, "")
+        if not post_text:
+            post_text = next(iter(response.variants.values()), "")
+
+        poster = LinkedInPoster()
+        result = poster.post_to_linkedin(
+            post_content=post_text,
+            hashtags=response.hashtags,
+            visibility="PUBLIC",
+        )
+
+        response.posted_to_linkedin = result.success
+        response.post_url = result.post_url or ""
+        response.post_id = result.post_id or ""
+        if not result.success:
+            self.logger.warning(f"⚠️ LinkedIn posting failed: {result.error_message}")
+
+        return response
+
+    def schedule_and_post(
+        self,
+        input_data: "MultiModalInput",
+        scheduled_time: str,
+        variant_key: str = "storyteller",
+        status_callback=None,
+    ) -> "AgenticWorkflowResponse":
+        """
+        Generate posts with agents, then schedule the best variant on LinkedIn.
+        """
+        from tools.linkedin_poster import LinkedInPoster
+
+        response = self.generate_with_agents(input_data, status_callback)
+        if not response.success:
+            return response
+
+        post_text = response.variants.get(variant_key, "")
+        if not post_text:
+            post_text = next(iter(response.variants.values()), "")
+
+        poster = LinkedInPoster()
+        result = poster.schedule_post(
+            post_content=post_text,
+            scheduled_time=scheduled_time,
+            hashtags=response.hashtags,
+        )
+
+        response.posted_to_linkedin = result.success
+        response.post_url = result.post_url or ""
+        response.post_id = result.post_id or ""
+        response.scheduled_time = scheduled_time
+
+        return response

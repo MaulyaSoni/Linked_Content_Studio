@@ -1,206 +1,87 @@
 """
-UI Styles - Theming and CSS
-===========================
-Clean styling and theming for the LinkedIn post generator.
+UI Styles - Premium Theme System
+=================================
+Dark / Light mode with bold colors, gradient headings, Jakarta Sans + Poppins fonts,
+gear-based loading animations, and polished borders & buttons.
 """
 
 import streamlit as st
 
 
-class Theme:
-    """LinkedIn-inspired theme configuration."""
-    
-    # Colors
-    PRIMARY_COLOR = "#0077B5"          # LinkedIn Blue
-    SECONDARY_COLOR = "#005885"        # Darker Blue
-    BACKGROUND_COLOR = "#FFFFFF"        # White
-    SURFACE_COLOR = "#F3F2EF"          # Light Gray
-    SUCCESS_COLOR = "#057642"          # Green
-    WARNING_COLOR = "#B24020"          # Orange
-    ERROR_COLOR = "#CC1016"            # Red
-    
-    # Typography
-    FONT_FAMILY = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-    
-    # Spacing
-    SPACING_SMALL = "0.5rem"
-    SPACING_MEDIUM = "1rem"
-    SPACING_LARGE = "2rem"
+# ═══════════════════════════════════════════════════════════════════════════
+# THEME CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════
+
+class ThemeLight:
+    """Light-mode palette — bold black / blue / red accents."""
+    NAME = "light"
+    BG              = "#FFFFFF"
+    BG_SECONDARY    = "#F5F7FA"
+    SURFACE         = "#FFFFFF"
+    SURFACE_BORDER  = "#E2E8F0"
+    TEXT            = "#111827"
+    TEXT_MUTED      = "#6B7280"
+
+    PRIMARY         = "#1D4ED8"   # Bold blue
+    PRIMARY_HOVER   = "#1E40AF"
+    ACCENT_RED      = "#DC2626"
+    ACCENT_BLACK    = "#111827"
+    ACCENT_CYAN     = "#06B6D4"
+
+    BTN_1_BG = ACCENT_RED;    BTN_1_FG = "#FFFFFF"   # red-white
+    BTN_2_BG = ACCENT_BLACK;  BTN_2_FG = "#FFFFFF"   # black-white
+    BTN_3_BG = PRIMARY;       BTN_3_FG = ACCENT_CYAN # blue-cyan
+    BTN_4_BG = "#FFFFFF";     BTN_4_FG = ACCENT_RED  # white-red
+
+    GRADIENT_START  = "#1D4ED8"
+    GRADIENT_MID    = "#DC2626"
+    GRADIENT_END    = "#111827"
+
+    SUCCESS  = "#16A34A"
+    WARNING  = "#D97706"
+    ERROR    = "#DC2626"
 
 
-def apply_custom_css():
-    """Apply custom CSS styling to the Streamlit app."""
-    
-    css = f"""
-    <style>
-    /* LinkedIn-inspired theme */
-    .stApp {{
-        font-family: {Theme.FONT_FAMILY};
-    }}
-    
-    /* Header styling */
-    .main-header {{
-        text-align: center;
-        padding: {Theme.SPACING_LARGE} 0;
-        background: linear-gradient(135deg, {Theme.PRIMARY_COLOR}, {Theme.SECONDARY_COLOR});
-        color: white;
-        margin: -2rem -2rem {Theme.SPACING_MEDIUM} -2rem;
-        border-radius: 0;
-    }}
-    
-    /* Button styling */
-    .stButton > button {{
-        background-color: {Theme.PRIMARY_COLOR};
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 0.5rem 1rem;
-        font-weight: 600;
-        transition: all 0.2s ease;
-    }}
-    
-    .stButton > button:hover {{
-        background-color: {Theme.SECONDARY_COLOR};
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(0, 119, 181, 0.2);
-    }}
-    
-    /* Primary button styling */
-    .stButton > button[kind="primary"] {{
-        background-color: {Theme.PRIMARY_COLOR};
-        font-size: 1.1rem;
-        padding: 0.75rem 2rem;
-    }}
-    
-    /* Input field styling */
-    .stTextInput > div > div > input,
-    .stTextArea > div > div > textarea,
-    .stSelectbox > div > div > select {{
-        border: 2px solid #E1E5E9;
-        border-radius: 8px;
-        padding: 0.75rem;
-        transition: border-color 0.2s ease;
-    }}
-    
-    .stTextInput > div > div > input:focus,
-    .stTextArea > div > div > textarea:focus,
-    .stSelectbox > div > div > select:focus {{
-        border-color: {Theme.PRIMARY_COLOR};
-        box-shadow: 0 0 0 3px rgba(0, 119, 181, 0.1);
-    }}
-    
-    /* Card styling */
-    .card {{
-        background: white;
-        border: 1px solid #E1E5E9;
-        border-radius: 12px;
-        padding: {Theme.SPACING_LARGE};
-        margin: {Theme.SPACING_MEDIUM} 0;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }}
-    
-    /* Metric styling */
-    .stMetric {{
-        background-color: {Theme.SURFACE_COLOR};
-        padding: 1rem;
-        border-radius: 8px;
-        text-align: center;
-    }}
-    
-    /* Success message styling */
-    .stSuccess {{
-        background-color: rgba(5, 118, 66, 0.1);
-        border-left: 4px solid {Theme.SUCCESS_COLOR};
-        padding: 1rem;
-        border-radius: 4px;
-    }}
-    
-    /* Error message styling */
-    .stError {{
-        background-color: rgba(204, 16, 22, 0.1);
-        border-left: 4px solid {Theme.ERROR_COLOR};
-        padding: 1rem;
-        border-radius: 4px;
-    }}
-    
-    /* Warning message styling */
-    .stWarning {{
-        background-color: rgba(178, 64, 32, 0.1);
-        border-left: 4px solid {Theme.WARNING_COLOR};
-        padding: 1rem;
-        border-radius: 4px;
-    }}
-    
-    /* Info message styling */
-    .stInfo {{
-        background-color: rgba(0, 119, 181, 0.1);
-        border-left: 4px solid {Theme.PRIMARY_COLOR};
-        padding: 1rem;
-        border-radius: 4px;
-    }}
-    
-    /* Expander styling */
-    .streamlit-expanderHeader {{
-        background-color: {Theme.SURFACE_COLOR};
-        border-radius: 8px;
-        font-weight: 600;
-    }}
-    
-    /* Sidebar styling */
-    .css-1d391kg {{
-        background-color: {Theme.SURFACE_COLOR};
-    }}
-    
-    /* Code block styling */
-    .stCode {{
-        background-color: #F6F8FA;
-        border: 1px solid #E1E5E9;
-        border-radius: 6px;
-        padding: 1rem;
-    }}
-    
-    /* Responsive design */
-    @media (max-width: 768px) {{
-        .main-header {{
-            margin: -1rem -1rem {Theme.SPACING_MEDIUM} -1rem;
-            padding: {Theme.SPACING_LARGE} {Theme.SPACING_MEDIUM};
-        }}
-        
-        .stButton > button {{
-            padding: 0.75rem 1rem;
-            font-size: 0.9rem;
-        }}
-    }}
-    
-    /* Animation classes */
-    .fade-in {{
-        animation: fadeIn 0.5s ease-in;
-    }}
-    
-    @keyframes fadeIn {{
-        from {{ opacity: 0; transform: translateY(10px); }}
-        to {{ opacity: 1; transform: translateY(0); }}
-    }}
-    
-    /* Loading animation */
-    .loading-spinner {{
-        border: 3px solid {Theme.SURFACE_COLOR};
-        border-top: 3px solid {Theme.PRIMARY_COLOR};
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        animation: spin 1s linear infinite;
-    }}
-    
-    @keyframes spin {{
-        0% {{ transform: rotate(0deg); }}
-        100% {{ transform: rotate(360deg); }}
-    }}
-    </style>
-    """
-    
-    st.markdown(css, unsafe_allow_html=True)
+class ThemeDark:
+    """Dark-mode palette — yellow / cyan / classic-white / light-green accents."""
+    NAME = "dark"
+    BG              = "#0F172A"
+    BG_SECONDARY    = "#1E293B"
+    SURFACE         = "#1E293B"
+    SURFACE_BORDER  = "#334155"
+    TEXT            = "#F1F5F9"
+    TEXT_MUTED      = "#94A3B8"
 
+    PRIMARY         = "#FACC15"   # Bold yellow
+    PRIMARY_HOVER   = "#EAB308"
+    ACCENT_RED      = "#F87171"
+    ACCENT_BLACK    = "#F1F5F9"   # classic white on dark
+    ACCENT_CYAN     = "#22D3EE"
+
+    BTN_1_BG = "#FACC15";    BTN_1_FG = "#0F172A"   # yellow-black
+    BTN_2_BG = "#22D3EE";    BTN_2_FG = "#0F172A"   # cyan-black
+    BTN_3_BG = "#4ADE80";    BTN_3_FG = "#0F172A"   # green-black
+    BTN_4_BG = "#F1F5F9";    BTN_4_FG = "#DC2626"   # white-red
+
+    GRADIENT_START  = "#FACC15"
+    GRADIENT_MID    = "#22D3EE"
+    GRADIENT_END    = "#4ADE80"
+
+    SUCCESS  = "#4ADE80"
+    WARNING  = "#FACC15"
+    ERROR    = "#F87171"
+
+
+def _get_theme():
+    """Return the active theme object based on session-state toggle."""
+    if st.session_state.get("dark_mode", False):
+        return ThemeDark
+    return ThemeLight
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PAGE CONFIG
+# ═══════════════════════════════════════════════════════════════════════════
 
 def setup_page_config():
     """Configure Streamlit page settings."""
@@ -212,63 +93,557 @@ def setup_page_config():
         menu_items={
             'Get Help': 'https://github.com/yourusername/linkedin-post-generator',
             'Report a bug': None,
-            'About': "AI-powered LinkedIn content generator with clean architecture"
+            'About': "AI-powered LinkedIn content generator — bold, modern, beautiful."
         }
     )
 
 
-def add_custom_fonts():
-    """Add custom fonts if needed."""
-    fonts_css = """
+# ═══════════════════════════════════════════════════════════════════════════
+# MASTER CSS
+# ═══════════════════════════════════════════════════════════════════════════
+
+def apply_custom_css():
+    """Inject the full custom CSS (adapts to current theme)."""
+    T = _get_theme()
+
+    css = f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
-    body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
+    /* ── FONTS ─────────────────────────────────────────────── */
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600&display=swap');
+
+    :root {{
+        --bg:             {T.BG};
+        --bg2:            {T.BG_SECONDARY};
+        --surface:        {T.SURFACE};
+        --border:         {T.SURFACE_BORDER};
+        --text:           {T.TEXT};
+        --text-muted:     {T.TEXT_MUTED};
+        --primary:        {T.PRIMARY};
+        --primary-hover:  {T.PRIMARY_HOVER};
+        --accent-red:     {T.ACCENT_RED};
+        --accent-cyan:    {T.ACCENT_CYAN};
+        --success:        {T.SUCCESS};
+        --warning:        {T.WARNING};
+        --error:          {T.ERROR};
+        --grad-start:     {T.GRADIENT_START};
+        --grad-mid:       {T.GRADIENT_MID};
+        --grad-end:       {T.GRADIENT_END};
+    }}
+
+    /* ── BASE ──────────────────────────────────────────────── */
+    .stApp {{
+        background-color: var(--bg) !important;
+        color: var(--text) !important;
+        font-family: 'Poppins', sans-serif !important;
+    }}
+
+    h1, h2, h3, h4, .stButton > button,
+    .mode-card-title, .section-title {{
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-weight: 700 !important;
+    }}
+
+    p, span, label, .stTextInput label, .stSelectbox label,
+    .stTextArea label, .stMarkdown, li {{
+        font-family: 'Poppins', sans-serif !important;
+        color: var(--text) !important;
+    }}
+
+    /* ── SHINY GRADIENT HEADINGS ───────────────────────────── */
+    .gradient-title {{
+        background: linear-gradient(135deg, var(--grad-start), var(--grad-mid), var(--grad-end));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }}
+
+    .gradient-title-lg {{
+        font-size: 2.8rem;
+        line-height: 1.15;
+    }}
+
+    .gradient-title-md {{
+        font-size: 1.6rem;
+        line-height: 1.3;
+    }}
+
+    .gradient-title-sm {{
+        font-size: 1.15rem;
+        line-height: 1.35;
+    }}
+
+    /* ── BUTTONS (global) ──────────────────────────────────── */
+    .stButton > button {{
+        font-size: 1.3rem !important;
+        padding: 0.65rem 1.6rem !important;
+        border-radius: 14px !important;
+        border: 2px solid var(--border) !important;
+        font-weight: 700 !important;
+        transition: all 0.25s cubic-bezier(.4,0,.2,1) !important;
+        letter-spacing: 0.01em;
+    }}
+    .stButton > button:hover {{
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+    }}
+
+    /* Primary button */
+    .stButton > button[kind="primary"],
+    .stButton > button[data-testid="stBaseButton-primary"] {{
+        background: linear-gradient(135deg, {T.BTN_1_BG}, {T.PRIMARY}) !important;
+        color: {T.BTN_1_FG} !important;
+        border: none !important;
+        font-size: 1.5rem !important;
+        padding: 0.75rem 2rem !important;
+    }}
+    .stButton > button[kind="primary"]:hover,
+    .stButton > button[data-testid="stBaseButton-primary"]:hover {{
+        background: linear-gradient(135deg, {T.PRIMARY}, {T.BTN_1_BG}) !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+    }}
+
+    /* Secondary buttons */
+    .stButton > button[kind="secondary"],
+    .stButton > button[data-testid="stBaseButton-secondary"] {{
+        background: {T.BTN_2_BG} !important;
+        color: {T.BTN_2_FG} !important;
+        border: 2px solid {T.BTN_2_BG} !important;
+    }}
+    .stButton > button[kind="secondary"]:hover,
+    .stButton > button[data-testid="stBaseButton-secondary"]:hover {{
+        background: transparent !important;
+        color: {T.BTN_2_BG} !important;
+    }}
+
+    /* ── INPUT FIELDS ──────────────────────────────────────── */
+    .stTextInput > div > div > input,
+    .stTextArea > div > div > textarea,
+    .stSelectbox > div > div > select,
+    .stSelectbox > div > div {{
+        background-color: var(--surface) !important;
+        color: var(--text) !important;
+        border: 2px solid var(--border) !important;
+        border-radius: 12px !important;
+        padding: 0.75rem 1rem !important;
+        font-family: 'Poppins', sans-serif !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    }}
+    .stTextInput > div > div > input:focus,
+    .stTextArea > div > div > textarea:focus {{
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 3px rgba(29,78,216,0.15) !important;
+    }}
+
+    /* ── CARDS ─────────────────────────────────────────────── */
+    .premium-card {{
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin: 0.75rem 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        transition: all 0.3s ease;
+    }}
+    .premium-card:hover {{
+        border-color: var(--primary);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }}
+
+    /* ── MODE SELECTOR CARDS ──────────────────────────────── */
+    .mode-card {{
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        padding: 1.25rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }}
+    .mode-card:hover {{
+        border-color: var(--primary);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        transform: translateY(-3px);
+    }}
+    .mode-card.active {{
+        border-color: var(--primary);
+        background: linear-gradient(135deg, var(--primary), var(--grad-mid));
+        color: white !important;
+    }}
+    .mode-card-title {{
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin: 0.5rem 0 0.25rem 0;
+    }}
+    .mode-card-desc {{
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }}
+
+    /* ── METRICS ───────────────────────────────────────────── */
+    div[data-testid="stMetric"],
+    .stMetric {{
+        background: var(--surface) !important;
+        border: 2px solid var(--border) !important;
+        border-radius: 14px !important;
+        padding: 1rem !important;
+        text-align: center !important;
+    }}
+    div[data-testid="stMetricValue"] {{
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-weight: 800 !important;
+        color: var(--primary) !important;
+    }}
+
+    /* ── EXPANDER ──────────────────────────────────────────── */
+    .streamlit-expanderHeader {{
+        background-color: var(--bg2) !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        border: 1px solid var(--border) !important;
+    }}
+
+    /* ── SIDEBAR ───────────────────────────────────────────── */
+    section[data-testid="stSidebar"] {{
+        background-color: var(--bg2) !important;
+        border-right: 2px solid var(--border) !important;
+    }}
+    section[data-testid="stSidebar"] .stMarkdown {{
+        color: var(--text) !important;
+    }}
+
+    /* ── TABS ──────────────────────────────────────────────── */
+    .stTabs [data-baseweb="tab-list"] {{
+        gap: 8px;
+    }}
+    .stTabs [data-baseweb="tab"] {{
+        border-radius: 12px 12px 0 0;
+        padding: 0.6rem 1.2rem;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-weight: 600;
+        border: 2px solid var(--border);
+        border-bottom: none;
+        background: var(--bg2);
+        transition: all 0.2s ease;
+    }}
+    .stTabs [aria-selected="true"] {{
+        background: var(--surface) !important;
+        border-color: var(--primary) !important;
+        color: var(--primary) !important;
+    }}
+
+    /* ── RADIO / CHECKBOX ─────────────────────────────────── */
+    .stRadio > label, .stCheckbox > label {{
+        font-family: 'Poppins', sans-serif !important;
+    }}
+    .stRadio > div[role="radiogroup"] > label {{
+        background: var(--surface) !important;
+        border: 2px solid var(--border) !important;
+        border-radius: 12px !important;
+        padding: 0.5rem 1rem !important;
+        margin-right: 0.5rem !important;
+        transition: all 0.2s ease !important;
+    }}
+    .stRadio > div[role="radiogroup"] > label:hover {{
+        border-color: var(--primary) !important;
+    }}
+    .stRadio > div[role="radiogroup"] > label[data-checked="true"] {{
+        border-color: var(--primary) !important;
+        background: linear-gradient(135deg, var(--primary), var(--grad-mid)) !important;
+        color: var(--bg) !important;
+    }}
+
+    /* ── DIVIDER ───────────────────────────────────────────── */
+    hr {{
+        border: none !important;
+        height: 2px !important;
+        background: linear-gradient(90deg, transparent, var(--border), transparent) !important;
+        margin: 1.5rem 0 !important;
+    }}
+
+    /* ── CODE BLOCK (post preview) ─────────────────────────── */
+    .stCode, pre {{
+        background-color: var(--bg2) !important;
+        border: 2px solid var(--border) !important;
+        border-radius: 14px !important;
+        padding: 1.25rem !important;
+        font-family: 'Poppins', sans-serif !important;
+        color: var(--text) !important;
+    }}
+
+    /* ── TOAST / ALERTS ────────────────────────────────────── */
+    .stSuccess {{
+        background: linear-gradient(90deg, rgba(22,163,74,0.08), rgba(22,163,74,0.02)) !important;
+        border-left: 5px solid var(--success) !important;
+        border-radius: 12px !important;
+        padding: 1rem 1.25rem !important;
+    }}
+    .stError {{
+        background: linear-gradient(90deg, rgba(220,38,38,0.08), rgba(220,38,38,0.02)) !important;
+        border-left: 5px solid var(--error) !important;
+        border-radius: 12px !important;
+    }}
+    .stWarning {{
+        background: linear-gradient(90deg, rgba(217,119,6,0.08), rgba(217,119,6,0.02)) !important;
+        border-left: 5px solid var(--warning) !important;
+        border-radius: 12px !important;
+    }}
+    .stInfo {{
+        background: linear-gradient(90deg, rgba(29,78,216,0.08), rgba(29,78,216,0.02)) !important;
+        border-left: 5px solid var(--primary) !important;
+        border-radius: 12px !important;
+    }}
+
+    /* ── PROGRESS BAR ──────────────────────────────────────── */
+    .stProgress > div > div > div {{
+        background: linear-gradient(90deg, var(--grad-start), var(--grad-mid), var(--grad-end)) !important;
+        border-radius: 8px !important;
+    }}
+
+    /* ── SCROLLBAR ─────────────────────────────────────────── */
+    ::-webkit-scrollbar {{
+        width: 8px;
+    }}
+    ::-webkit-scrollbar-track {{
+        background: var(--bg2);
+    }}
+    ::-webkit-scrollbar-thumb {{
+        background: var(--border);
+        border-radius: 8px;
+    }}
+    ::-webkit-scrollbar-thumb:hover {{
+        background: var(--primary);
+    }}
+
+    /* ── ANIMATION HELPERS ─────────────────────────────────── */
+    .fade-in {{
+        animation: fadeIn 0.5s ease-in;
+    }}
+    @keyframes fadeIn {{
+        from {{ opacity: 0; transform: translateY(12px); }}
+        to   {{ opacity: 1; transform: translateY(0); }}
+    }}
+    .slide-up {{
+        animation: slideUp 0.6s ease-out;
+    }}
+    @keyframes slideUp {{
+        from {{ opacity: 0; transform: translateY(30px); }}
+        to   {{ opacity: 1; transform: translateY(0); }}
+    }}
+
+    /* ── RESPONSIVE ────────────────────────────────────────── */
+    @media (max-width: 768px) {{
+        .stButton > button {{
+            font-size: 1.1rem !important;
+            padding: 0.55rem 1rem !important;
+            border-radius: 12px !important;
+        }}
+        .gradient-title-lg {{
+            font-size: 2rem;
+        }}
+    }}
     </style>
     """
-    st.markdown(fonts_css, unsafe_allow_html=True)
+    st.markdown(css, unsafe_allow_html=True)
 
 
-def render_loading_animation():
-    """Render a custom loading animation."""
-    loading_html = """
-    <div style="text-align: center; padding: 2rem;">
-        <div class="loading-spinner" style="margin: 0 auto 1rem auto;"></div>
-        <p style="color: #666;">Generating your LinkedIn post...</p>
+# ═══════════════════════════════════════════════════════════════════════════
+# LOADING ANIMATIONS — Next-level gear / circle
+# ═══════════════════════════════════════════════════════════════════════════
+
+def render_loading_animation(message: str = "Generating your LinkedIn post…"):
+    """Render a premium gear + 100% progress-circle loading animation with blurred backdrop."""
+    T = _get_theme()
+    bg_rgba = '15,23,42' if T.NAME == 'dark' else '255,255,255'
+    loading_html = f"""
+    <style>
+    .loading-overlay {{
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba({bg_rgba}, 0.85);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }}
+    .gear svg {{
+        animation: gearSpin 2.5s linear infinite;
+    }}
+    .gear.reverse svg {{
+        animation: gearSpinReverse 2.5s linear infinite;
+    }}
+    @keyframes gearSpin {{
+        from {{ transform: rotate(0deg); }}
+        to   {{ transform: rotate(360deg); }}
+    }}
+    @keyframes gearSpinReverse {{
+        from {{ transform: rotate(0deg); }}
+        to   {{ transform: rotate(-360deg); }}
+    }}
+    .progress-ring svg {{
+        transform: rotate(-90deg);
+    }}
+    .progress-ring circle {{
+        fill: none;
+        stroke-width: 6;
+        stroke-linecap: round;
+    }}
+    .progress-ring .bg {{
+        stroke: {T.SURFACE_BORDER};
+    }}
+    .progress-ring .fg {{
+        stroke: url(#loadGrad);
+        stroke-dasharray: 339.292;
+        animation: circleProgress 2.2s ease-in-out infinite;
+    }}
+    @keyframes circleProgress {{
+        0%   {{ stroke-dashoffset: 339.292; }}
+        50%  {{ stroke-dashoffset: 40; }}
+        100% {{ stroke-dashoffset: 339.292; }}
+    }}
+    .loading-text {{
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-top: 1.5rem;
+        color: {T.TEXT};
+    }}
+    .loading-sub {{
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.9rem;
+        color: {T.TEXT_MUTED};
+        margin-top: 0.4rem;
+    }}
+    </style>
+
+    <div class="loading-overlay">
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:1rem;">
+            <div class="gear" style="width:60px;height:60px;">
+                <svg viewBox="0 0 100 100" width="60" height="60">
+                    <path d="M50 15 L54 5 L46 5 Z M50 85 L54 95 L46 95 Z M15 50 L5 46 L5 54 Z M85 50 L95 54 L95 46 Z
+                             M22 22 L14 17 L17 14 Z M78 22 L83 14 L86 17 Z M22 78 L17 86 L14 83 Z M78 78 L86 83 L83 86 Z"
+                          fill="{T.PRIMARY}"/>
+                    <circle cx="50" cy="50" r="25" fill="{T.PRIMARY}" opacity="0.85"/>
+                    <circle cx="50" cy="50" r="12" fill="{T.SURFACE}"/>
+                </svg>
+            </div>
+            <div class="gear reverse" style="width:40px;height:40px;margin-top:10px;">
+                <svg viewBox="0 0 100 100" width="40" height="40">
+                    <path d="M50 15 L54 5 L46 5 Z M50 85 L54 95 L46 95 Z M15 50 L5 46 L5 54 Z M85 50 L95 54 L95 46 Z
+                             M22 22 L14 17 L17 14 Z M78 22 L83 14 L86 17 Z M22 78 L17 86 L14 83 Z M78 78 L86 83 L83 86 Z"
+                          fill="{T.ACCENT_CYAN}"/>
+                    <circle cx="50" cy="50" r="25" fill="{T.ACCENT_CYAN}" opacity="0.85"/>
+                    <circle cx="50" cy="50" r="12" fill="{T.SURFACE}"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="progress-ring" style="width:120px;height:120px;">
+            <svg width="120" height="120">
+                <defs>
+                    <linearGradient id="loadGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="{T.GRADIENT_START}"/>
+                        <stop offset="50%" stop-color="{T.GRADIENT_MID}"/>
+                        <stop offset="100%" stop-color="{T.GRADIENT_END}"/>
+                    </linearGradient>
+                </defs>
+                <circle class="bg" cx="60" cy="60" r="54"/>
+                <circle class="fg" cx="60" cy="60" r="54"/>
+            </svg>
+        </div>
+
+        <div class="loading-text">{message}</div>
+        <div class="loading-sub">Please wait — AI agents at work</div>
     </div>
     """
-    st.markdown(loading_html, unsafe_allow_html=True)
+    return st.markdown(loading_html, unsafe_allow_html=True)
 
+
+def render_inline_loader(message: str = "Processing…"):
+    """A smaller inline gear loader for within-page spinners."""
+    T = _get_theme()
+    html = f"""
+    <div style="display:flex;align-items:center;gap:12px;padding:1rem 0;">
+        <svg width="32" height="32" viewBox="0 0 100 100" style="animation: gearSpin 2s linear infinite;">
+            <style>@keyframes gearSpin {{ from{{transform:rotate(0)}} to{{transform:rotate(360deg)}} }}</style>
+            <path d="M50 15 L54 5 L46 5 Z M50 85 L54 95 L46 95 Z M15 50 L5 46 L5 54 Z M85 50 L95 54 L95 46 Z
+                     M22 22 L14 17 L17 14 Z M78 22 L83 14 L86 17 Z M22 78 L17 86 L14 83 Z M78 78 L86 83 L83 86 Z"
+                  fill="{T.PRIMARY}"/>
+            <circle cx="50" cy="50" r="25" fill="{T.PRIMARY}" opacity="0.85"/>
+            <circle cx="50" cy="50" r="12" fill="{T.SURFACE}"/>
+        </svg>
+        <span style="font-family:'Poppins',sans-serif;color:{T.TEXT};font-size:1rem;">{message}</span>
+    </div>
+    """
+    return st.markdown(html, unsafe_allow_html=True)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# HELPER RENDERERS
+# ═══════════════════════════════════════════════════════════════════════════
 
 def apply_card_style(content: str, title: str = "") -> str:
-    """Wrap content in a styled card."""
-    card_html = f"""
-    <div class="card fade-in">
-        {f'<h3 style="margin-top: 0; color: {Theme.PRIMARY_COLOR};">{title}</h3>' if title else ''}
+    """Wrap content in a styled premium card."""
+    return f"""
+    <div class="premium-card fade-in">
+        {f'<h3 class="gradient-title gradient-title-md" style="margin-top:0;">{title}</h3>' if title else ''}
         {content}
     </div>
     """
-    return card_html
 
 
 def render_section_header(title: str, icon: str = ""):
-    """Render a styled section header."""
+    """Render a styled section header with gradient underline."""
+    T = _get_theme()
     st.markdown(f"""
-    <div style="margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid {Theme.SURFACE_COLOR};">
-        <h2 style="margin: 0; color: #333;">
+    <div style="margin:2rem 0 1rem 0;padding-bottom:0.5rem;
+                border-bottom:3px solid transparent;
+                border-image:linear-gradient(90deg,{T.GRADIENT_START},{T.GRADIENT_MID},{T.GRADIENT_END}) 1;">
+        <h2 class="gradient-title gradient-title-md" style="margin:0;">
             {icon} {title}
         </h2>
     </div>
     """, unsafe_allow_html=True)
 
 
+def render_theme_toggle():
+    """Render the dark/light mode toggle in sidebar."""
+    dark = st.sidebar.toggle(
+        "🌙 Dark Mode",
+        value=st.session_state.get("dark_mode", False),
+        key="dark_mode_toggle"
+    )
+    if dark != st.session_state.get("dark_mode", False):
+        st.session_state["dark_mode"] = dark
+        st.rerun()
+
+
 def add_tooltip(text: str, tooltip: str):
     """Add a tooltip to text."""
-    tooltip_html = f"""
-    <span style="border-bottom: 1px dotted #666; cursor: help;" title="{tooltip}">
+    st.markdown(f"""
+    <span style="border-bottom:1px dotted var(--text-muted);cursor:help;" title="{tooltip}">
         {text}
     </span>
-    """
-    st.markdown(tooltip_html, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
+
+
+def get_mode_color(mode_name: str) -> str:
+    """Return an accent colour for a generation mode — for presentation cards."""
+    T = _get_theme()
+    mode_colors = {
+        "simple":      T.PRIMARY,
+        "advanced":    T.ACCENT_CYAN,
+        "hackathon":   T.ACCENT_RED,
+        "agentic":     T.GRADIENT_MID,
+        "storyteller": T.PRIMARY,
+        "strategist":  T.ACCENT_CYAN,
+        "provocateur": T.ACCENT_RED,
+    }
+    return mode_colors.get(mode_name.lower(), T.PRIMARY)

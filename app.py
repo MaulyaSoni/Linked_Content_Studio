@@ -46,7 +46,16 @@ except ImportError as e:
 
 # UI imports
 from ui.components import UIComponents
-from ui.styles import setup_page_config, apply_custom_css
+from ui.styles import setup_page_config, apply_custom_css, render_loading_animation, render_inline_loader
+
+# Agentic Studio imports (lazy — only fail at use-time if missing)
+try:
+    from ui.multi_modal_input import render_multi_modal_input
+    from ui.agent_dashboard import render_agent_dashboard, update_agent_status, render_agentic_results
+    from core.models import MultiModalInput
+    AGENTIC_UI_AVAILABLE = True
+except ImportError as _agentic_import_err:
+    AGENTIC_UI_AVAILABLE = False
 
 # Utils
 from utils.logger import get_logger
@@ -88,20 +97,25 @@ class LinkedInPostApp:
             st.session_state.current_response = None
         if 'generation_count' not in st.session_state:
             st.session_state.generation_count = 0
+        if 'agentic_response' not in st.session_state:
+            st.session_state.agentic_response = None
+        if 'show_scheduler' not in st.session_state:
+            st.session_state.show_scheduler = False
+        if 'dark_mode' not in st.session_state:
+            st.session_state.dark_mode = False
+        if 'chat_history' not in st.session_state:
+            st.session_state.chat_history = []
     
     def _render_app(self):
         """Render the main application interface."""
+        # Sidebar (rendered first so toggle is available)
+        UIComponents.render_sidebar()
+
         # Header
         UIComponents.render_header()
-        
-        # Main layout
-        col1, col2 = st.columns([3, 1])
-        
-        with col1:
-            self._render_main_content()
-        
-        with col2:
-            UIComponents.render_sidebar()
+
+        # Main content
+        self._render_main_content()
     
     def _render_main_content(self):
         """Render the main content generation interface."""
@@ -112,20 +126,27 @@ class LinkedInPostApp:
             return
         
         # Post Type Selection (Top Level)
-        st.markdown("### 📝 Select Post Type")
+        st.markdown('<h3 class="gradient-title gradient-title-md">📝 Select Post Type</h3>',
+                    unsafe_allow_html=True)
         post_type = st.radio(
             "Choose what you want to create:",
             [
                 "🚀 SIMPLE Topic",
                 "📊 ADVANCED GitHub",
                 "🏆 HACKATHON Project",
+                "🤖 AGENTIC Studio",
             ],
             horizontal=True,
             label_visibility="collapsed"
         )
         
         st.markdown("---")
-        
+
+        # ── Agentic Studio ────────────────────────────────────────────────
+        if post_type == "🤖 AGENTIC Studio":
+            self._render_agentic_studio()
+            return
+
         # Handle Hackathon separately
         if post_type == "🏆 HACKATHON Project":
             from ui.components import render_hackathon_section
@@ -145,7 +166,8 @@ class LinkedInPostApp:
                         st.success("✅ Post generated successfully!")
                         
                         # Display the post
-                        st.markdown("### 📱 Your Post")
+                        st.markdown('<h3 class="gradient-title gradient-title-sm">' 
+                                    '📱 Your Post</h3>', unsafe_allow_html=True)
                         st.code(response.post, language="markdown")
                         
                         # Copy buttons
@@ -156,7 +178,8 @@ class LinkedInPostApp:
                         
                         # Display hashtags
                         if response.hashtags:
-                            st.markdown("### #️⃣ Suggested Hashtags")
+                            st.markdown('<h3 class="gradient-title gradient-title-sm">' 
+                                        '#️⃣ Suggested Hashtags</h3>', unsafe_allow_html=True)
                             st.code(response.hashtags)
                             
                             with col2:
@@ -165,7 +188,8 @@ class LinkedInPostApp:
                         
                         # Display metrics
                         st.markdown("---")
-                        st.markdown("### 📊 Generation Metrics")
+                        st.markdown('<h3 class="gradient-title gradient-title-sm">' 
+                                    '📊 Generation Metrics</h3>', unsafe_allow_html=True)
                         
                         col1, col2, col3, col4 = st.columns(4)
                         with col1:
@@ -220,6 +244,102 @@ class LinkedInPostApp:
         if st.session_state.current_response:
             UIComponents.render_post_output(st.session_state.current_response)
     
+    # ------------------------------------------------------------------
+    # AGENTIC STUDIO
+    # ------------------------------------------------------------------
+
+    def _render_agentic_studio(self):
+        """Render the 6-agent AI Content Studio workflow."""
+        if not AGENTIC_UI_AVAILABLE:
+            st.error("⚠️ Agentic UI modules failed to load. Check imports.")
+            return
+
+        if not self.generator:
+            st.error("❌ Generator not available. Check your GROQ_API_KEY.")
+            return
+
+        st.markdown('<h2 class="gradient-title gradient-title-md">' 
+                    '🤖 Agentic AI Content Studio</h2>', unsafe_allow_html=True)
+        st.caption(
+            "6 specialized AI agents analyze your content, research trends, "
+            "build strategy, write 3 post variants, align your brand voice, "
+            "and predict engagement — all in one pipeline."
+        )
+
+        # Multi-modal input panel
+        input_data = render_multi_modal_input()
+
+        if input_data:
+            st.markdown("---")
+            st.markdown('<h3 class="gradient-title gradient-title-sm">' 
+                        '🚀 Starting 6-Agent Pipeline …</h3>', unsafe_allow_html=True)
+
+            # Agent status dashboard placeholders
+            placeholders = render_agent_dashboard()
+            progress_bar = st.progress(0.0, text="Initializing agents …")
+            status_text = st.empty()
+
+            # Build a WorkflowStatus callback that updates the UI
+            def _status_callback(ws):
+                """Update progress bar and agent card in real-time."""
+                try:
+                    progress_bar.progress(
+                        min(ws.progress / 100.0, 1.0),
+                        text=f"[{ws.agent_name}] {ws.message}"
+                    )
+                    status_text.markdown(
+                        f"**{ws.agent_name}** — `{ws.status}` — {ws.message}"
+                    )
+                    update_agent_status(placeholders, ws)
+                except Exception:
+                    pass  # Never crash the pipeline because of a UI error
+
+            try:
+                # Build MultiModalInput
+                modal = MultiModalInput(
+                    text=input_data.get("text", ""),
+                    image_paths=input_data.get("image_paths", []),
+                    document_paths=input_data.get("document_paths", []),
+                    urls=input_data.get("urls", []),
+                    past_posts=input_data.get("past_posts", []),
+                    tone=input_data.get("tone", "professional"),
+                    target_audience=input_data.get("audience", "professionals"),
+                )
+
+                # Run agentic pipeline
+                with st.spinner("🤖 Running AI agents …"):
+                    agentic_response = self.generator.generate_with_agents(
+                        input_data=modal,
+                        status_callback=_status_callback,
+                    )
+
+                progress_bar.progress(1.0, text="✅ Pipeline complete!")
+                status_text.empty()
+
+                st.session_state.agentic_response = agentic_response
+                st.session_state.generation_count += 1
+
+            except Exception as e:
+                self.logger.error(f"Agentic pipeline error: {e}")
+                st.error(f"❌ Pipeline failed: {e}")
+                if st.checkbox("🔧 Show debug info", key="agentic_debug"):
+                    st.exception(e)
+                return
+
+        # Render previously-generated agentic results
+        if st.session_state.get("agentic_response"):
+            st.markdown("---")
+            render_agentic_results(
+                st.session_state.agentic_response,
+                generator=self.generator,
+            )
+
+            if st.button("🔄 Generate Again", key="agentic_reset"):
+                st.session_state.agentic_response = None
+                st.rerun()
+
+    # ------------------------------------------------------------------
+
     def _handle_generation(
         self,
         mode: GenerationMode,
@@ -311,6 +431,14 @@ class LinkedInPostApp:
                 st.session_state.current_response = response
                 st.session_state.posts_generated += 1
                 st.session_state.generation_count += 1
+
+                # Track in chat history
+                import datetime as _dt
+                st.session_state.chat_history.append({
+                    "topic": topic or github_url or text_input[:40] or "Post",
+                    "mode": mode.value,
+                    "time": _dt.datetime.now().strftime("%H:%M"),
+                })
                 
                 # Log generation
                 self.logger.log_generation_success(

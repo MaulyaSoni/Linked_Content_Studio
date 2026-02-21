@@ -348,3 +348,84 @@ class HackathonPostResponse(PostResponse):
     project_showcase: str = ""                 # The technical section
     team_story: str = ""                       # The team collaboration section
     impact_statement: str = ""                 # The "what's next" section
+
+
+# ============================================================================
+# AGENTIC AI CONTENT STUDIO MODELS
+# ============================================================================
+
+@dataclass
+class MultiModalInput:
+    """Input container for the Agentic AI Content Studio."""
+    text: str = ""                             # Direct text / topic
+    image_paths: List[str] = field(default_factory=list)   # Image file paths
+    document_paths: List[str] = field(default_factory=list) # PDF/DOCX paths
+    urls: List[str] = field(default_factory=list)           # Web URLs
+    past_posts: List[str] = field(default_factory=list)     # For brand DNA
+    tone: str = "professional"
+    audience: str = "professionals"
+
+    def has_input(self) -> bool:
+        return any([self.text, self.image_paths, self.document_paths, self.urls])
+
+
+@dataclass
+class PostVariant:
+    """A single generated post variant."""
+    variant_type: str                          # storyteller | strategist | provocateur
+    content: str                               # Post text
+    virality_score: float = 0.5
+    engagement_prediction: Dict[str, Any] = field(default_factory=dict)
+    brand_feedback: Dict[str, Any] = field(default_factory=dict)
+    sentiment: Dict[str, Any] = field(default_factory=dict)
+    optimization_tips: List[str] = field(default_factory=list)
+
+
+@dataclass
+class ContentStrategy:
+    """Full content strategy from the ContentIntelligenceAgent."""
+    key_message: str = ""
+    target_audience: str = ""
+    emotional_hook: str = ""
+    content_pillars: List[str] = field(default_factory=list)
+    call_to_action: str = ""
+    angles: Dict[str, str] = field(default_factory=dict)
+
+
+@dataclass
+class AgenticWorkflowRequest:
+    """Request to run the full 6-agent content generation pipeline."""
+    input: MultiModalInput
+    user_id: Optional[str] = None
+    session_id: Optional[str] = None
+    timestamp: datetime = field(default_factory=datetime.now)
+
+
+@dataclass
+class AgenticWorkflowResponse:
+    """Final result from the 6-agent agentic workflow."""
+    success: bool
+
+    # Generated content
+    variants: Dict[str, str] = field(default_factory=dict)     # {type: post_text}
+    hashtags: str = ""
+    best_variant: str = "storyteller"
+
+    # Intelligence
+    strategy: Dict[str, Any] = field(default_factory=dict)
+    research: Dict[str, Any] = field(default_factory=dict)
+    brand_feedback: Dict[str, Any] = field(default_factory=dict)
+    optimization: Dict[str, Any] = field(default_factory=dict)
+    overall_recommendations: List[str] = field(default_factory=list)
+
+    # LinkedIn posting result
+    posted_to_linkedin: bool = False
+    post_url: str = ""
+    post_id: str = ""
+    scheduled_time: str = ""
+
+    # Metadata
+    total_time: float = 0.0
+    agents_run: List[str] = field(default_factory=list)
+    error_message: str = ""
+    timestamp: datetime = field(default_factory=datetime.now)
