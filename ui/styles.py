@@ -43,33 +43,33 @@ class ThemeLight:
 
 
 class ThemeDark:
-    """Dark-mode palette — yellow / cyan / classic-white / light-green accents."""
+    """Dark-mode palette — formal matte deep-blue / slate / white. No neon gradients."""
     NAME = "dark"
-    BG              = "#0F172A"
-    BG_SECONDARY    = "#1E293B"
-    SURFACE         = "#1E293B"
-    SURFACE_BORDER  = "#334155"
-    TEXT            = "#F1F5F9"
-    TEXT_MUTED      = "#94A3B8"
+    BG              = "#0D1117"   # GitHub-dark charcoal
+    BG_SECONDARY    = "#161B22"   # slightly lighter surface
+    SURFACE         = "#1C2128"   # card surface
+    SURFACE_BORDER  = "#30363D"   # subtle slate border
+    TEXT            = "#E6EDF3"   # near-white readable text
+    TEXT_MUTED      = "#7D8590"   # muted slate
 
-    PRIMARY         = "#FACC15"   # Bold yellow
-    PRIMARY_HOVER   = "#EAB308"
-    ACCENT_RED      = "#F87171"
-    ACCENT_BLACK    = "#F1F5F9"   # classic white on dark
-    ACCENT_CYAN     = "#22D3EE"
+    PRIMARY         = "#4D9FFF"   # bold matte blue (no neon)
+    PRIMARY_HOVER   = "#3887EB"
+    ACCENT_RED      = "#F85149"   # flat red
+    ACCENT_BLACK    = "#CDD9E5"   # near-white on dark
+    ACCENT_CYAN     = "#79C0FF"   # soft cool blue (replaces neon cyan)
 
-    BTN_1_BG = "#FACC15";    BTN_1_FG = "#0F172A"   # yellow-black
-    BTN_2_BG = "#22D3EE";    BTN_2_FG = "#0F172A"   # cyan-black
-    BTN_3_BG = "#4ADE80";    BTN_3_FG = "#0F172A"   # green-black
-    BTN_4_BG = "#F1F5F9";    BTN_4_FG = "#DC2626"   # white-red
+    BTN_1_BG = "#4D9FFF";    BTN_1_FG = "#0D1117"   # blue-dark
+    BTN_2_BG = "#CDD9E5";    BTN_2_FG = "#0D1117"   # white-dark
+    BTN_3_BG = "#F85149";    BTN_3_FG = "#E6EDF3"   # red-light
+    BTN_4_BG = "#1C2128";    BTN_4_FG = "#4D9FFF"   # surface-blue
 
-    GRADIENT_START  = "#FACC15"
-    GRADIENT_MID    = "#22D3EE"
-    GRADIENT_END    = "#4ADE80"
+    GRADIENT_START  = "#4D9FFF"   # all same → single solid tone (no rainbow)
+    GRADIENT_MID    = "#79C0FF"
+    GRADIENT_END    = "#4D9FFF"
 
-    SUCCESS  = "#4ADE80"
-    WARNING  = "#FACC15"
-    ERROR    = "#F87171"
+    SUCCESS  = "#3FB950"   # matte green
+    WARNING  = "#D29922"   # muted amber
+    ERROR    = "#F85149"   # flat red
 
 
 def _get_theme():
@@ -149,12 +149,10 @@ def apply_custom_css():
         color: var(--text) !important;
     }}
 
-    /* ── SHINY GRADIENT HEADINGS ───────────────────────────── */
+    /* ── HEADINGS — gradient in light, bold solid in dark ────── */
     .gradient-title {{
-        background: linear-gradient(135deg, var(--grad-start), var(--grad-mid), var(--grad-end));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        {'color: ' + T.PRIMARY + '; background: none; -webkit-text-fill-color: unset;' if T.NAME == 'dark' else
+         'background: linear-gradient(135deg, var(--grad-start), var(--grad-mid), var(--grad-end)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;'}
         font-family: 'Plus Jakarta Sans', sans-serif;
         font-weight: 800;
         letter-spacing: -0.02em;
@@ -190,19 +188,19 @@ def apply_custom_css():
         box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
     }}
 
-    /* Primary button */
+    /* Primary button — flat in dark, gradient in light */
     .stButton > button[kind="primary"],
     .stButton > button[data-testid="stBaseButton-primary"] {{
-        background: linear-gradient(135deg, {T.BTN_1_BG}, {T.PRIMARY}) !important;
+        background: {f'{T.BTN_1_BG}' if T.NAME == 'dark' else f'linear-gradient(135deg, {T.BTN_1_BG}, {T.PRIMARY})'} !important;
         color: {T.BTN_1_FG} !important;
-        border: none !important;
+        border: {'2px solid ' + T.PRIMARY if T.NAME == 'dark' else 'none'} !important;
         font-size: 1.5rem !important;
         padding: 0.75rem 2rem !important;
     }}
     .stButton > button[kind="primary"]:hover,
     .stButton > button[data-testid="stBaseButton-primary"]:hover {{
-        background: linear-gradient(135deg, {T.PRIMARY}, {T.BTN_1_BG}) !important;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+        background: {T.PRIMARY_HOVER} !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
     }}
 
     /* Secondary buttons */
@@ -270,8 +268,8 @@ def apply_custom_css():
     }}
     .mode-card.active {{
         border-color: var(--primary);
-        background: linear-gradient(135deg, var(--primary), var(--grad-mid));
-        color: white !important;
+        background: {'var(--primary)' if T.NAME == 'dark' else 'linear-gradient(135deg, var(--primary), var(--grad-mid))'};
+        color: {'var(--bg)' if T.NAME == 'dark' else 'white'} !important;
     }}
     .mode-card-title {{
         font-size: 1.3rem;
@@ -353,7 +351,7 @@ def apply_custom_css():
     }}
     .stRadio > div[role="radiogroup"] > label[data-checked="true"] {{
         border-color: var(--primary) !important;
-        background: linear-gradient(135deg, var(--primary), var(--grad-mid)) !important;
+        background: {'var(--primary)' if T.NAME == 'dark' else 'linear-gradient(135deg, var(--primary), var(--grad-mid))'} !important;
         color: var(--bg) !important;
     }}
 
@@ -400,7 +398,7 @@ def apply_custom_css():
 
     /* ── PROGRESS BAR ──────────────────────────────────────── */
     .stProgress > div > div > div {{
-        background: linear-gradient(90deg, var(--grad-start), var(--grad-mid), var(--grad-end)) !important;
+        background: {'var(--primary)' if T.NAME == 'dark' else 'linear-gradient(90deg, var(--grad-start), var(--grad-mid), var(--grad-end))'} !important;
         border-radius: 8px !important;
     }}
 
