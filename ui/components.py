@@ -79,13 +79,7 @@ class UIComponents:
                 st.session_state.generation_mode = GenerationMode.ADVANCED
                 st.rerun()
 
-        mode = st.session_state.generation_mode
-        if mode == GenerationMode.ADVANCED:
-            st.info("🚀 **Advanced Mode** — Uses repository analysis for higher-quality posts")
-        else:
-            st.info("⚡ **Simple Mode** — Fast generation that works with any input")
-
-        return mode
+        return st.session_state.generation_mode
 
     # ── CONTENT TYPE ──────────────────────────────────────────────────────
 
@@ -216,8 +210,7 @@ class UIComponents:
             with col2:
                 max_length = st.slider("Max Length", 500, 3000, 2000, 100)
 
-            st.markdown("---")
-            render_section_header("Quality Improvements", "🎯")
+            st.markdown('<p style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:0.95rem;margin:0.8rem 0 0.4rem 0;">🎯 Quality Improvements</p>', unsafe_allow_html=True)
 
             col3, col4 = st.columns(2)
             with col3:
@@ -276,7 +269,7 @@ class UIComponents:
 
         st.markdown(f"""
         <h2 class="gradient-title gradient-title-md slide-up" style="margin-top:1.5rem;">
-            📋 Generated Post
+            <span class="gt-icon">📋</span> Generated Post
         </h2>
         """, unsafe_allow_html=True)
 
@@ -293,7 +286,7 @@ class UIComponents:
         if hasattr(response, 'quality_score') and response.quality_score:
             st.markdown("---")
             st.markdown(f"""
-            <h3 class="gradient-title gradient-title-sm">📊 Quality Analysis</h3>
+            <h3 class="gradient-title gradient-title-sm"><span class="gt-icon">📊</span> Quality Analysis</h3>
             """, unsafe_allow_html=True)
 
             score_data = response.quality_score
@@ -323,7 +316,7 @@ class UIComponents:
         # ── Hook Options ──
         if hasattr(response, 'hook_options') and response.hook_options:
             st.markdown("---")
-            st.markdown('<h3 class="gradient-title gradient-title-sm">🎣 Hook Options</h3>',
+            st.markdown('<h3 class="gradient-title gradient-title-sm"><span class="gt-icon">🎣</span> Hook Options</h3>',
                         unsafe_allow_html=True)
             hook_data = response.hook_options
             if isinstance(hook_data, dict):
@@ -341,7 +334,7 @@ class UIComponents:
             full_post += f"\n\n{response.hashtags}"
 
         st.markdown('<h3 class="gradient-title gradient-title-sm" style="margin-top:1.5rem;">'
-                    '✏️ Your Post (Editable)</h3>', unsafe_allow_html=True)
+                    '<span class="gt-icon">✏️</span> Your Post (Editable)</h3>', unsafe_allow_html=True)
         edited_post = st.text_area(
             "Edit your post:",
             value=full_post,
@@ -391,6 +384,61 @@ class UIComponents:
                 st.session_state.current_response = None
                 st.rerun()
 
+        # ── LinkedIn Posting ──
+        st.markdown("---")
+        st.markdown('<h3 class="gradient-title gradient-title-sm"><span class="gt-icon">📤</span> Post to LinkedIn</h3>',
+                    unsafe_allow_html=True)
+        li_col1, li_col2 = st.columns(2)
+
+        with li_col1:
+            if st.button("📤 Post Now", key="btn_post_linkedin", use_container_width=True,
+                         type="primary"):
+                with st.spinner("Posting to LinkedIn…"):
+                    try:
+                        from tools.linkedin_poster import LinkedInPoster
+                        poster = LinkedInPoster()
+                        result = poster.post_to_linkedin(
+                            post_content=edited_post,
+                            hashtags="",  # already embedded
+                        )
+                        if result.success:
+                            st.success(f"✅ Posted successfully! [View on LinkedIn]({result.post_url})")
+                        else:
+                            st.error(f"❌ {result.error_message}")
+                    except Exception as exc:
+                        st.error(f"❌ Error: {exc}")
+
+        with li_col2:
+            if st.button("⏰ Schedule Post", key="btn_schedule_linkedin", use_container_width=True):
+                st.session_state["show_schedule_simple"] = not st.session_state.get("show_schedule_simple", False)
+
+        if st.session_state.get("show_schedule_simple"):
+            from datetime import datetime, timedelta
+            sc1, sc2 = st.columns(2)
+            with sc1:
+                sched_date = st.date_input("Date", value=datetime.now().date() + timedelta(days=1),
+                                           key="sched_date_simple")
+            with sc2:
+                sched_time = st.time_input("Time", key="sched_time_simple")
+            if st.button("✅ Confirm Schedule", key="btn_confirm_schedule_simple"):
+                iso = datetime.combine(sched_date, sched_time).isoformat()
+                with st.spinner("Scheduling…"):
+                    try:
+                        from tools.linkedin_poster import LinkedInPoster
+                        poster = LinkedInPoster()
+                        result = poster.schedule_post(
+                            post_content=edited_post,
+                            scheduled_time=iso,
+                            hashtags="",
+                        )
+                        if result.success:
+                            st.success(f"✅ Scheduled for {iso}!")
+                        else:
+                            st.error(f"❌ {result.error_message}")
+                    except Exception as exc:
+                        st.error(f"❌ Error: {exc}")
+                st.session_state["show_schedule_simple"] = False
+
         # ── Context Sources ──
         if response.context_sources:
             with st.expander("📊 Sources Used"):
@@ -413,7 +461,7 @@ class UIComponents:
 
             # ── LinkedIn Tips ──
             st.markdown(f"""
-            <h3 class="gradient-title gradient-title-sm">💡 LinkedIn Tips</h3>
+            <h3 class="gradient-title gradient-title-sm"><span class="gt-icon">💡</span> LinkedIn Tips</h3>
             """, unsafe_allow_html=True)
             tips = [
                 "🎯 Hook readers in the first line",
@@ -435,18 +483,15 @@ class UIComponents:
 
             # ── System Status ──
             st.markdown(f"""
-            <h3 class="gradient-title gradient-title-sm">🔧 System Status</h3>
+            <h3 class="gradient-title gradient-title-sm"><span class="gt-icon">🔧</span> System Status</h3>
             """, unsafe_allow_html=True)
             st.success("✅ LLM Provider: Ready")
-            current_mode = st.session_state.get('generation_mode', GenerationMode.SIMPLE)
-            mode_display = "Advanced" if current_mode == GenerationMode.ADVANCED else "Simple"
-            st.info(f"ℹ️ Mode: {mode_display}")
 
             st.markdown("---")
 
             # ── Account Info — simple classic UI ──
             st.markdown(f"""
-            <h3 class="gradient-title gradient-title-sm">👤 Account</h3>
+            <h3 class="gradient-title gradient-title-sm"><span class="gt-icon">👤</span> Account</h3>
             """, unsafe_allow_html=True)
             st.markdown(f"""
             <div style="background:{T.SURFACE};border:1px solid {T.SURFACE_BORDER};
@@ -468,7 +513,7 @@ class UIComponents:
 
             # ── Chat History — simple classic UI ──
             st.markdown(f"""
-            <h3 class="gradient-title gradient-title-sm">📜 Recent History</h3>
+            <h3 class="gradient-title gradient-title-sm"><span class="gt-icon">📜</span> Recent History</h3>
             """, unsafe_allow_html=True)
 
             history = st.session_state.get("chat_history", [])
@@ -519,7 +564,7 @@ def render_hackathon_section():
 
     st.markdown(f"""
     <h2 class="gradient-title gradient-title-md slide-up">
-        🏆 Hackathon & Competition Post
+        <span class="gt-icon">🏆</span> Hackathon &amp; Competition Post
     </h2>
     <p style="font-family:'Poppins',sans-serif;color:{T.TEXT_MUTED};margin-bottom:1.5rem;">
         Create an engaging post about your hackathon / competition experience

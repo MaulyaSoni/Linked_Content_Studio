@@ -1,7 +1,7 @@
 """
 LinkedIn Poster Tool
 ====================
-Posts content directly to LinkedIn via the UGC Posts API.
+Posts content directly to LinkedIn via the Posts API (v2/rest).
 Requires LINKEDIN_ACCESS_TOKEN and LINKEDIN_USER_ID in .env
 
 Usage:
@@ -40,7 +40,7 @@ class LinkedInPostResult:
 
 class LinkedInPoster:
     """
-    Posts content to LinkedIn via OAuth 2.0 / UGC Posts API.
+    Posts content to LinkedIn via OAuth 2.0 / Posts API (rest).
     
     Required env variables:
         LINKEDIN_ACCESS_TOKEN
@@ -50,8 +50,9 @@ class LinkedInPoster:
         LINKEDIN_CLIENT_SECRET
     """
 
-    API_BASE = "https://api.linkedin.com/v2"
+    API_BASE = "https://api.linkedin.com"
     LINKEDIN_BASE = "https://www.linkedin.com"
+    LINKEDIN_API_VERSION = "202601"
 
     def __init__(self):
         self.access_token = os.getenv("LINKEDIN_ACCESS_TOKEN", "")
@@ -158,7 +159,7 @@ class LinkedInPoster:
             import requests  # type: ignore
 
             resp = requests.delete(
-                f"{self.API_BASE}/ugcPosts/{post_id}",
+                f"{self.API_BASE}/rest/posts/{post_id}",
                 headers=self._headers(),
                 timeout=10,
             )
@@ -177,7 +178,7 @@ class LinkedInPoster:
             import requests  # type: ignore
 
             resp = requests.get(
-                f"{self.API_BASE}/ugcPosts/{post_id}",
+                f"{self.API_BASE}/rest/posts/{post_id}",
                 headers=self._headers(),
                 timeout=10,
             )
@@ -198,7 +199,8 @@ class LinkedInPoster:
         return {
             "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json",
-            "X-Requested-With": "XMLHttpRequest",
+            "X-Restli-Protocol-Version": "2.0.0",
+            "LinkedIn-Version": self.LINKEDIN_API_VERSION,
         }
 
     def _build_payload(
@@ -211,27 +213,38 @@ class LinkedInPoster:
     ) -> Dict:
         payload: Dict = {
             "author": f"urn:li:person:{self.user_id}",
+            "commentary": content,
+            "visibility": visibility,
+            "distribution": {
+                "feedDistribution": "MAIN_FEED",
+                "targetEntities": [],
+                "thirdPartyDistributionChannels": [],
+            },
             "lifecycleState": "PUBLISHED",
-            "specificContent": {
-                "com.linkedin.ugc.Share": {
-                    "shareCommentary": {"text": content},
-                    "shareMediaCategory": post_type,
-                }
-            },
-            "visibility": {
-                "com.linkedin.ugc.MemberNetworkVisibility": visibility
-            },
         }
 
         if media_urls and post_type != "TEXT":
-            payload["specificContent"]["com.linkedin.ugc.Share"]["media"] = [
-                {"type": "ARTICLE", "status": "READY", "originalUrl": u}
-                for u in media_urls
-            ]
+            media_category_map = {
+                "IMAGE": "IMAGE",
+                "VIDEO": "VIDEO",
+                "DOCUMENT": "NATIVE_DOCUMENT",
+                "ARTICLE": "ARTICLE",
+            }
+            payload["content"] = {
+                "article": {
+                    "source": media_urls[0],
+                    "title": "",
+                    "description": "",
+                }
+            } if post_type == "ARTICLE" or post_type == "TEXT" else {
+                "media": {
+                    "id": media_urls[0],
+                }
+            }
 
         if scheduled_time:
-            payload["lifecycleState"] = "SCHEDULED"
-            payload["firstPublishedAt"] = self._to_ms_epoch(scheduled_time)
+            payload["lifecycleState"] = "DRAFT"
+            payload["scheduledPublishTime"] = self._to_ms_epoch(scheduled_time)
 
         return payload
 
@@ -240,13 +253,13 @@ class LinkedInPoster:
             import requests  # type: ignore
 
             resp = requests.post(
-                f"{self.API_BASE}/ugcPosts",
+                f"{self.API_BASE}/rest/posts",
                 headers=self._headers(),
                 json=payload,
                 timeout=10,
             )
             if resp.status_code == 201:
-                post_id = resp.headers.get("X-LinkedIn-Id", "unknown")
+                post_id = resp.headers.get("x-restli-id", resp.headers.get("X-LinkedIn-Id", "unknown"))
                 return {"success": True, "post_id": post_id}
             error = resp.json().get("message", resp.text) if resp.text else str(resp.status_code)
             return {"success": False, "error": error}

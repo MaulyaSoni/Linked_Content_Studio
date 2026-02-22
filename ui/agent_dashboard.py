@@ -31,7 +31,7 @@ AGENT_INFO = {
 def render_agent_dashboard():
     """Renders an empty agent status dashboard with premium cards."""
     T = _get_theme()
-    st.markdown('<h3 class="gradient-title gradient-title-md">🤖 AI Agent Workflow</h3>',
+    st.markdown('<h3 class="gradient-title gradient-title-md"><span class="gt-icon">🤖</span> AI Agent Workflow</h3>',
                 unsafe_allow_html=True)
     placeholders = {}
     cols = st.columns(3)
@@ -141,7 +141,7 @@ def render_agentic_results(response, generator=None):
 
     # ── 3 VARIANT TABS ──
     st.markdown('<h3 class="gradient-title gradient-title-md" style="margin-top:1.5rem;">'
-                '📱 Your 3 Post Variants</h3>', unsafe_allow_html=True)
+                '<span class="gt-icon">📱</span> Your 3 Post Variants</h3>', unsafe_allow_html=True)
 
     best = response.best_variant
     variant_meta = {
@@ -259,7 +259,7 @@ def render_agentic_results(response, generator=None):
     # ── HASHTAGS ──
     if response.hashtags:
         st.markdown("---")
-        st.markdown('<h3 class="gradient-title gradient-title-sm">#️⃣ Hashtags</h3>',
+        st.markdown('<h3 class="gradient-title gradient-title-sm"><span class="gt-icon">#️⃣</span> Hashtags</h3>',
                     unsafe_allow_html=True)
         st.code(response.hashtags)
         if st.button("📋 Copy Hashtags", key="copy_hashtags"):

@@ -110,6 +110,7 @@ def apply_custom_css():
     <style>
     /* ── FONTS ─────────────────────────────────────────────── */
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
     :root {{
         --bg:             {T.BG};
@@ -147,15 +148,23 @@ def apply_custom_css():
     .stTextArea label, .stMarkdown, li {{
         font-family: 'Poppins', sans-serif !important;
         color: var(--text) !important;
+        -webkit-text-fill-color: var(--text) !important;
     }}
 
+    /* Re-allow gradient titles to override the above safely */
     /* ── HEADINGS — gradient in light, bold solid in dark ────── */
     .gradient-title {{
-        {'color: ' + T.PRIMARY + '; background: none; -webkit-text-fill-color: unset;' if T.NAME == 'dark' else
-         'background: linear-gradient(135deg, var(--grad-start), var(--grad-mid), var(--grad-end)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;'}
+        {'color: ' + T.PRIMARY + ' !important; background: none !important; -webkit-text-fill-color: ' + T.PRIMARY + ' !important;' if T.NAME == 'dark' else
+         'background: linear-gradient(135deg, var(--grad-start), var(--grad-mid), var(--grad-end)) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; background-clip: text !important;'}
         font-family: 'Plus Jakarta Sans', sans-serif;
         font-weight: 800;
         letter-spacing: -0.02em;
+    }}
+    /* Child elements of gradient-title inherit the transparent fill in light mode */
+    .gradient-title span:not(.gt-icon),
+    .gradient-title h1, .gradient-title h2, .gradient-title h3 {{
+        {'color: ' + T.PRIMARY + ' !important; -webkit-text-fill-color: ' + T.PRIMARY + ' !important;' if T.NAME == 'dark' else
+         '-webkit-text-fill-color: transparent !important; background-clip: text !important; -webkit-background-clip: text !important;'}
     }}
 
     .gradient-title-lg {{
@@ -297,12 +306,42 @@ def apply_custom_css():
     }}
 
     /* ── EXPANDER ──────────────────────────────────────────── */
-    .streamlit-expanderHeader {{
+    .streamlit-expanderHeader,
+    [data-testid="stExpander"] > details > summary {{
         background-color: var(--bg2) !important;
         border-radius: 12px !important;
         font-weight: 600 !important;
         font-family: 'Plus Jakarta Sans', sans-serif !important;
         border: 1px solid var(--border) !important;
+        color: var(--text) !important;
+    }}
+    /* Fix expander toggle arrow rendering as raw "arrow_right" text */
+    [data-testid="stExpander"] details summary span,
+    [data-testid="stExpanderToggleIcon"],
+    details summary .st-emotion-cache-1h9usn1,
+    details > summary > span {{
+        font-family: 'Material Symbols Rounded', 'Material Icons', sans-serif !important;
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24 !important;
+        font-size: 1.2rem !important;
+        color: var(--text) !important;
+        -webkit-text-fill-color: var(--text) !important;
+        background: none !important;
+        background-clip: initial !important;
+        -webkit-background-clip: initial !important;
+    }}
+
+    /* ── TOP HEADER BAR (white stripe fix) ─────────────────── */
+    header[data-testid="stHeader"] {{
+        background-color: var(--bg) !important;
+        border-bottom: 1px solid var(--border) !important;
+    }}
+    .stAppHeader {{
+        background-color: var(--bg) !important;
+    }}
+    /* Toolbar buttons inside header */
+    header[data-testid="stHeader"] button,
+    header[data-testid="stHeader"] a {{
+        color: var(--text) !important;
     }}
 
     /* ── SIDEBAR ───────────────────────────────────────────── */
@@ -444,9 +483,237 @@ def apply_custom_css():
             font-size: 2rem;
         }}
     }}
+
+    /* ── MATERIAL SYMBOLS — sidebar collapse icon ──────────── */
+    .material-symbols-rounded,
+    [data-testid="stSidebarCollapseButton"] span,
+    [data-testid="collapsedControl"] span,
+    button[data-testid="baseButton-headerNoPadding"] span {{
+        font-family: 'Material Symbols Rounded' !important;
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24 !important;
+    }}
+
+    /* ── GRADIENT TITLE ICON — resets emoji/icon inside gradient text ── */
+    .gt-icon {{
+        -webkit-text-fill-color: initial !important;
+        background: none !important;
+        -webkit-background-clip: initial !important;
+        background-clip: initial !important;
+        display: inline;
+    }}
+
+    /* ── ENHANCED INPUT FIELDS (dark mode compatible) ────────── */
+    [data-baseweb="base-input"] {{
+        background-color: var(--surface) !important;
+        border-color: var(--border) !important;
+    }}
+    [data-baseweb="base-input"] > div,
+    [data-baseweb="base-input"] input,
+    [data-baseweb="base-input"] textarea {{
+        background-color: var(--surface) !important;
+        color: var(--text) !important;
+        -webkit-text-fill-color: var(--text) !important;
+        caret-color: var(--primary) !important;
+    }}
+
+    /* ── SELECT BOX — control wrapper ───────────────────────── */
+    div[data-baseweb="select"] > div,
+    .stSelectbox > div > div {{
+        background-color: {T.SURFACE} !important;
+        border: 1.5px solid {T.SURFACE_BORDER} !important;
+        border-radius: 12px !important;
+    }}
+
+    /* ── SELECT BOX — ULTRA-SPECIFICITY text color fix ────────
+       Class-repetition trick (.cls.cls.cls) triples CSS
+       specificity to always beat Emotion's generated classes.
+       Hardcoded hex avoids var() resolution failures.          */
+    .stSelectbox.stSelectbox.stSelectbox [data-baseweb="select"] div,
+    .stSelectbox.stSelectbox.stSelectbox [data-baseweb="select"] span,
+    .stSelectbox.stSelectbox.stSelectbox [data-baseweb="select"] p,
+    .stSelectbox.stSelectbox.stSelectbox [data-baseweb="select"] [class*="css-"],
+    .stSelectbox.stSelectbox.stSelectbox [data-baseweb="select"] [class*="st-"],
+    .stMultiSelect.stMultiSelect.stMultiSelect [data-baseweb="select"] div,
+    .stMultiSelect.stMultiSelect.stMultiSelect [data-baseweb="select"] span,
+    div[data-baseweb="select"][data-baseweb="select"][data-baseweb="select"] div,
+    div[data-baseweb="select"][data-baseweb="select"][data-baseweb="select"] span,
+    div[data-baseweb="select"][data-baseweb="select"][data-baseweb="select"] [class*="css-"] {{
+        color: {T.TEXT} !important;
+        -webkit-text-fill-color: {T.TEXT} !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        background: transparent !important;
+        background-clip: initial !important;
+        -webkit-background-clip: initial !important;
+    }}
+
+    /* Re-apply surface BG to outer control only */
+    .stSelectbox.stSelectbox.stSelectbox [data-baseweb="select"] > div {{
+        background-color: {T.SURFACE} !important;
+    }}
+
+    /* ── SELECT BOX — placeholder text ───────────────────────── */
+    .stSelectbox.stSelectbox.stSelectbox [data-baseweb="select-placeholder"],
+    .stSelectbox.stSelectbox.stSelectbox [data-baseweb="select-placeholder"] * {{
+        color: {T.TEXT_MUTED} !important;
+        -webkit-text-fill-color: {T.TEXT_MUTED} !important;
+    }}
+
+    /* ── SELECT BOX — SVG chevron ────────────────────────────── */
+    div[data-baseweb="select"] svg,
+    div[data-baseweb="select"] svg path {{
+        fill: {T.TEXT_MUTED} !important;
+        color: {T.TEXT_MUTED} !important;
+        -webkit-text-fill-color: unset !important;
+    }}
+
+    input::placeholder,
+    textarea::placeholder {{
+        color: var(--text-muted) !important;
+        -webkit-text-fill-color: var(--text-muted) !important;
+        opacity: 1 !important;
+    }}
+
+    /* ── DROPDOWN POPUP / POPOVER ─────────────────────────── */
+    [data-baseweb="popover"] > div,
+    [data-baseweb="popover"] [data-baseweb="menu"],
+    [data-baseweb="popover"] ul {{
+        background-color: {T.SURFACE} !important;
+        border: 1px solid {T.SURFACE_BORDER} !important;
+        border-radius: 12px !important;
+        box-shadow: 0 8px 28px rgba(0,0,0,0.35) !important;
+    }}
+    [data-baseweb="option"],
+    li[role="option"],
+    ul[role="listbox"] li {{
+        background-color: {T.SURFACE} !important;
+        color: {T.TEXT} !important;
+        -webkit-text-fill-color: {T.TEXT} !important;
+        font-family: 'Poppins', sans-serif !important;
+        cursor: pointer !important;
+    }}
+    [data-baseweb="option"] *,
+    li[role="option"] * {{
+        color: {T.TEXT} !important;
+        -webkit-text-fill-color: {T.TEXT} !important;
+    }}
+    [data-baseweb="option"]:hover,
+    li[role="option"]:hover {{
+        background-color: {T.BG_SECONDARY} !important;
+        color: {T.PRIMARY} !important;
+        -webkit-text-fill-color: {T.PRIMARY} !important;
+    }}
+    [data-baseweb="option"]:hover *,
+    li[role="option"]:hover * {{
+        color: {T.PRIMARY} !important;
+        -webkit-text-fill-color: {T.PRIMARY} !important;
+    }}
+    [aria-selected="true"][data-baseweb="option"],
+    [aria-selected="true"][data-baseweb="option"] * {{
+        background-color: {T.BG_SECONDARY} !important;
+        color: {T.PRIMARY} !important;
+        -webkit-text-fill-color: {T.PRIMARY} !important;
+        font-weight: 600 !important;
+    }}
+
+    /* ── FILE UPLOADER ──────────────────────────────────────── */
+    [data-testid="stFileUploader"] {{
+        background-color: var(--surface) !important;
+        border-radius: 12px !important;
+    }}
+    [data-testid="stFileUploaderDropzone"] {{
+        background-color: var(--bg2) !important;
+        border: 2px dashed var(--border) !important;
+        border-radius: 12px !important;
+    }}
+    [data-testid="stFileUploaderDropzoneInstructions"],
+    [data-testid="stFileUploaderDropzoneInstructions"] span,
+    [data-testid="stFileUploaderDropzoneInstructions"] small {{
+        color: var(--text-muted) !important;
+    }}
+    [data-testid="stFileUploaderDropzone"] button {{
+        background-color: var(--surface) !important;
+        color: var(--primary) !important;
+        border: 1px solid var(--primary) !important;
+    }}
+
+    /* ── CURSOR: POINTER ON ALL DROPDOWNS & SELECTS ─────────── */
+    .stSelectbox,
+    .stSelectbox > div,
+    .stSelectbox > div > div,
+    .stSelectbox > div > div > div,
+    .stSelectbox svg,
+    [data-baseweb="select"] > div,
+    [data-baseweb="option"],
+    [role="option"],
+    [role="listbox"] li,
+    .stDateInput,
+    .stTimeInput,
+    .stMultiSelect > div > div,
+    .stSlider > div > div {{
+        cursor: pointer !important;
+    }}
+
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
+
+    # ── JavaScript fix: force selectbox value text visibility ──────────
+    # Streamlit's Emotion CSS-in-JS engine injects styles AFTER our
+    # stylesheet, which can override even !important rules.
+    # This script patches the DOM directly after every render.
+    T2 = _get_theme()
+    st.html(f"""
+    <script>
+    (function() {{
+        var TEXT   = "{T2.TEXT}";
+        var MUTED  = "{T2.TEXT_MUTED}";
+        var SURF   = "{T2.SURFACE}";
+        var BORDER = "{T2.SURFACE_BORDER}";
+
+        function fixAllSelects() {{
+            document.querySelectorAll('[data-baseweb="select"]').forEach(function(sel) {{
+                // Fix the outer control background
+                var ctrl = sel.querySelector(':scope > div');
+                if (ctrl) {{
+                    ctrl.style.setProperty('background-color', SURF, 'important');
+                    ctrl.style.setProperty('border-color', BORDER, 'important');
+                    ctrl.style.setProperty('border-radius', '12px', 'important');
+                }}
+
+                // Fix ALL inner text elements (spans, divs, etc.)
+                sel.querySelectorAll('div, span, p').forEach(function(el) {{
+                    el.style.setProperty('color', TEXT, 'important');
+                    el.style.setProperty('-webkit-text-fill-color', TEXT, 'important');
+                    el.style.setProperty('opacity', '1', 'important');
+                }});
+
+                // Fix SVG chevron separately
+                sel.querySelectorAll('svg, path').forEach(function(svg) {{
+                    svg.style.setProperty('fill', MUTED, 'important');
+                }});
+            }});
+        }}
+
+        // Run immediately
+        fixAllSelects();
+
+        // Run on every DOM mutation (handles Streamlit re-renders)
+        var debounce = null;
+        var observer = new MutationObserver(function() {{
+            clearTimeout(debounce);
+            debounce = setTimeout(fixAllSelects, 50);
+        }});
+        observer.observe(document.body, {{
+            childList: true, subtree: true,
+            attributes: true, attributeFilter: ['class', 'style']
+        }});
+
+        // Also run on an interval as a safety net
+        setInterval(fixAllSelects, 500);
+    }})();
+    </script>
+    """)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -456,7 +723,7 @@ def apply_custom_css():
 def render_loading_animation(message: str = "Generating your LinkedIn post…"):
     """Render a premium gear + 100% progress-circle loading animation with blurred backdrop."""
     T = _get_theme()
-    bg_rgba = '15,23,42' if T.NAME == 'dark' else '255,255,255'
+    bg_rgba = '13,17,23' if T.NAME == 'dark' else '255,255,255'
     loading_html = f"""
     <style>
     .loading-overlay {{
@@ -600,12 +867,15 @@ def apply_card_style(content: str, title: str = "") -> str:
 def render_section_header(title: str, icon: str = ""):
     """Render a styled section header with gradient underline."""
     T = _get_theme()
+    border_val = f'3px solid {T.PRIMARY}' if T.NAME == 'dark' else '3px solid transparent'
+    border_img = '' if T.NAME == 'dark' else f'border-image:linear-gradient(90deg,{T.GRADIENT_START},{T.GRADIENT_MID},{T.GRADIENT_END}) 1;'
+    icon_html = f'<span class="gt-icon" style="margin-right:0.3em;">{icon}</span>' if icon else ''
     st.markdown(f"""
     <div style="margin:2rem 0 1rem 0;padding-bottom:0.5rem;
-                border-bottom:3px solid transparent;
-                border-image:linear-gradient(90deg,{T.GRADIENT_START},{T.GRADIENT_MID},{T.GRADIENT_END}) 1;">
+                border-bottom:{border_val};
+                {border_img}">
         <h2 class="gradient-title gradient-title-md" style="margin:0;">
-            {icon} {title}
+            {icon_html}{title}
         </h2>
     </div>
     """, unsafe_allow_html=True)

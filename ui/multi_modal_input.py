@@ -22,7 +22,7 @@ def render_multi_modal_input() -> Optional[Dict]:
     T = _get_theme()
 
     st.markdown('<h3 class="gradient-title gradient-title-sm">'
-                '🎯 What would you like to post about?</h3>',
+                '<span class="gt-icon">🎯</span> What would you like to post about?</h3>',
                 unsafe_allow_html=True)
     st.markdown(f"""
     <p style="font-family:'Poppins',sans-serif;color:{T.TEXT_MUTED};font-size:0.9rem;margin-bottom:1rem;">
@@ -104,17 +104,34 @@ def render_multi_modal_input() -> Optional[Dict]:
 
     # ── STYLE ──
     st.markdown("---")
+    TONE_MAP = {
+        "professional":  "💼 Professional",
+        "casual":        "😊 Casual",
+        "enthusiastic":  "🔥 Enthusiastic",
+        "thoughtful":    "🤔 Thoughtful",
+        "bold":          "💪 Bold",
+    }
+    AUDIENCE_MAP = {
+        "professionals":  "👔 Professionals",
+        "developers":     "💻 Developers",
+        "founders":       "🚀 Founders",
+        "entrepreneurs":  "💡 Entrepreneurs",
+        "tech_leaders":   "🏆 Tech Leaders",
+        "general":        "🌍 General",
+    }
     col_t, col_a = st.columns(2)
     with col_t:
         tone = st.selectbox(
             "🎨 Preferred Tone",
-            ["professional", "casual", "enthusiastic", "thoughtful", "bold"],
+            options=list(TONE_MAP.keys()),
+            format_func=lambda x: TONE_MAP[x],
             key="agentic_tone",
         )
     with col_a:
         audience = st.selectbox(
             "👥 Target Audience",
-            ["professionals", "developers", "founders", "entrepreneurs", "tech_leaders", "general"],
+            options=list(AUDIENCE_MAP.keys()),
+            format_func=lambda x: AUDIENCE_MAP[x],
             key="agentic_audience",
         )
 

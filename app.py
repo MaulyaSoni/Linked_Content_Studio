@@ -126,10 +126,8 @@ class LinkedInPostApp:
             return
         
         # Post Type Selection (Top Level)
-        st.markdown('<h3 class="gradient-title gradient-title-md">📝 Select Post Type</h3>',
-                    unsafe_allow_html=True)
         post_type = st.radio(
-            "Choose what you want to create:",
+            "📝 Select Post Type",
             [
                 "🚀 SIMPLE Topic",
                 "📊 ADVANCED GitHub",
@@ -137,7 +135,6 @@ class LinkedInPostApp:
                 "🤖 AGENTIC Studio",
             ],
             horizontal=True,
-            label_visibility="collapsed"
         )
         
         st.markdown("---")
@@ -167,7 +164,7 @@ class LinkedInPostApp:
                         
                         # Display the post
                         st.markdown('<h3 class="gradient-title gradient-title-sm">' 
-                                    '📱 Your Post</h3>', unsafe_allow_html=True)
+                                    '<span class="gt-icon">📱</span> Your Post</h3>', unsafe_allow_html=True)
                         st.code(response.post, language="markdown")
                         
                         # Copy buttons
@@ -179,7 +176,7 @@ class LinkedInPostApp:
                         # Display hashtags
                         if response.hashtags:
                             st.markdown('<h3 class="gradient-title gradient-title-sm">' 
-                                        '#️⃣ Suggested Hashtags</h3>', unsafe_allow_html=True)
+                                        '<span class="gt-icon">#️⃣</span> Suggested Hashtags</h3>', unsafe_allow_html=True)
                             st.code(response.hashtags)
                             
                             with col2:
@@ -189,7 +186,7 @@ class LinkedInPostApp:
                         # Display metrics
                         st.markdown("---")
                         st.markdown('<h3 class="gradient-title gradient-title-sm">' 
-                                    '📊 Generation Metrics</h3>', unsafe_allow_html=True)
+                                    '<span class="gt-icon">📊</span> Generation Metrics</h3>', unsafe_allow_html=True)
                         
                         col1, col2, col3, col4 = st.columns(4)
                         with col1:
@@ -259,7 +256,7 @@ class LinkedInPostApp:
             return
 
         st.markdown('<h2 class="gradient-title gradient-title-md">' 
-                    '🤖 Agentic AI Content Studio</h2>', unsafe_allow_html=True)
+                    '<span class="gt-icon">🤖</span> Agentic AI Content Studio</h2>', unsafe_allow_html=True)
         st.caption(
             "6 specialized AI agents analyze your content, research trends, "
             "build strategy, write 3 post variants, align your brand voice, "
@@ -272,7 +269,7 @@ class LinkedInPostApp:
         if input_data:
             st.markdown("---")
             st.markdown('<h3 class="gradient-title gradient-title-sm">' 
-                        '🚀 Starting 6-Agent Pipeline …</h3>', unsafe_allow_html=True)
+                        '<span class="gt-icon">🚀</span> Starting 6-Agent Pipeline …</h3>', unsafe_allow_html=True)
 
             # Agent status dashboard placeholders
             placeholders = render_agent_dashboard()
@@ -303,7 +300,7 @@ class LinkedInPostApp:
                     urls=input_data.get("urls", []),
                     past_posts=input_data.get("past_posts", []),
                     tone=input_data.get("tone", "professional"),
-                    target_audience=input_data.get("audience", "professionals"),
+                    audience=input_data.get("audience", "professionals"),
                 )
 
                 # Run agentic pipeline
