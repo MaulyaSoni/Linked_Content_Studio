@@ -228,8 +228,7 @@ def apply_custom_css():
     /* ── INPUT FIELDS ──────────────────────────────────────── */
     .stTextInput > div > div > input,
     .stTextArea > div > div > textarea,
-    .stSelectbox > div > div > select,
-    .stSelectbox > div > div {{
+    .stSelectbox > div > div > select {{
         background-color: var(--surface) !important;
         color: var(--text) !important;
         border: 2px solid var(--border) !important;
@@ -591,6 +590,10 @@ def apply_custom_css():
         -webkit-text-fill-color: {T.TEXT} !important;
         font-family: 'Poppins', sans-serif !important;
         cursor: pointer !important;
+        padding: 10px 15px !important;
+        margin: 2px 5px !important;
+        border-radius: 8px !important;
+        transition: all 0.2s ease !important;
     }}
     [data-baseweb="option"] *,
     li[role="option"] * {{
@@ -602,6 +605,7 @@ def apply_custom_css():
         background-color: {T.BG_SECONDARY} !important;
         color: {T.PRIMARY} !important;
         -webkit-text-fill-color: {T.PRIMARY} !important;
+        transform: translateX(4px) !important;
     }}
     [data-baseweb="option"]:hover *,
     li[role="option"]:hover * {{
