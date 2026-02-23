@@ -1,0 +1,38 @@
+{"asctime": "2026-02-23 02:08:31,014", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:09:11,404", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:09:18,542", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:09:26,615", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:10:07,946", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:10:09,982", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:10:15,174", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:10:19,804", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:10:20,320", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:10:25,133", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:10:26,083", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:10:33,771", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:10:36,323", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 Specificity enforcement applied", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:10:37,640", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:10:39,938", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:10:41,356", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:10:43,494", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 Specificity enforcement applied", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:10:48,415", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 Context grounding applied", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:11:00,297", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 Quality score calculated", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:11:00,300", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "Generation completed successfully | mode=advanced | duration_seconds=18.851781368255615 | tokens_used=1467 | timestamp=2026-02-23T02:11:00.300160", "filename": "logger.py", "lineno": 128}
+{"asctime": "2026-02-23 02:11:34,176", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:13:41,363", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:14:49,030", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:14:51,190", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:14:53,536", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:14:55,648", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:14:57,863", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 Specificity enforcement applied", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:14:58,614", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 Context grounding applied", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:14:59,288", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 Quality score calculated", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:14:59,294", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "Generation completed successfully | mode=advanced | duration_seconds=3.5555949211120605 | tokens_used=1697 | timestamp=2026-02-23T02:14:59.294220", "filename": "logger.py", "lineno": 128}
+{"asctime": "2026-02-23 02:15:17,193", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:15:19,821", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:15:20,823", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:15:22,679", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 Specificity enforcement applied", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:15:33,391", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 Context grounding applied", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:15:43,215", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 Quality score calculated", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-23 02:15:43,221", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "Generation completed successfully | mode=advanced | duration_seconds=22.279826164245605 | tokens_used=1466 | timestamp=2026-02-23T02:15:43.221021", "filename": "logger.py", "lineno": 128}
+{"asctime": "2026-02-23 02:15:55,045", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
