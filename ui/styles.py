@@ -184,32 +184,54 @@ def apply_custom_css():
 
     /* ── BUTTONS (global) ──────────────────────────────────── */
     .stButton > button {{
-        font-size: 1.3rem !important;
-        padding: 0.65rem 1.6rem !important;
-        border-radius: 14px !important;
-        border: 2px solid var(--border) !important;
+        font-size: 1rem !important;
+        padding: 0.6rem 1.2rem !important;
+        border-radius: 12px !important;
+        border: 2px solid #444 !important;
+        background-color: #1E1E1E !important;
+        color: white !important;
         font-weight: 700 !important;
-        transition: all 0.25s cubic-bezier(.4,0,.2,1) !important;
+        transition: all 0.25s ease-out !important;
         letter-spacing: 0.01em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
     }}
     .stButton > button:hover {{
         transform: translateY(-2px) !important;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important;
+        border-color: var(--primary) !important;
+    }}
+    .stButton > button .material-symbols-rounded {{
+        font-size: 1.2em;
+        transition: transform 0.25s ease-out !important;
+    }}
+    .stButton > button:hover .material-symbols-rounded {{
+        transform: scale(1.2);
+    }}
+
+    .stButton > button:active {{
+        transform: translateY(2px);
+        background: linear-gradient(135deg, #FF1493, #8A2BE2) !important;
+        border-color: transparent !important;
+        color: white !important;
+        box-shadow: 0 6px 20px rgba(255, 20, 147, 0.4) !important;
     }}
 
     /* Primary button — flat in dark, gradient in light */
     .stButton > button[kind="primary"],
     .stButton > button[data-testid="stBaseButton-primary"] {{
-        background: {f'{T.BTN_1_BG}' if T.NAME == 'dark' else f'linear-gradient(135deg, {T.BTN_1_BG}, {T.PRIMARY})'} !important;
-        color: {T.BTN_1_FG} !important;
-        border: {'2px solid ' + T.PRIMARY if T.NAME == 'dark' else 'none'} !important;
-        font-size: 1.5rem !important;
-        padding: 0.75rem 2rem !important;
+        background: linear-gradient(135deg, #8A2BE2, #FF1493) !important;
+        color: white !important;
+        border: none !important;
+        font-size: 1.1rem !important;
+        padding: 0.7rem 1.5rem !important;
     }}
     .stButton > button[kind="primary"]:hover,
     .stButton > button[data-testid="stBaseButton-primary"]:hover {{
-        background: {T.PRIMARY_HOVER} !important;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
+        transform: translateY(-2px) scale(1.02) !important;
+        box-shadow: 0 10px 25px rgba(138, 43, 226, 0.4) !important;
     }}
 
     /* Secondary buttons */

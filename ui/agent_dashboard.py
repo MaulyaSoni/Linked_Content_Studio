@@ -198,7 +198,7 @@ def render_agentic_results(response, generator=None):
                     key=f"dl_{variant_key}"
                 )
             with bc[2]:
-                if st.button("📤 Post Now", key=f"post_{variant_key}", use_container_width=True):
+                if st.button(f"📤 Post Now", key=f"post_{variant_key}", use_container_width=True, type="primary"):
                     if generator:
                         with st.spinner("📤 Posting to LinkedIn…"):
                             from tools.linkedin_poster import LinkedInPoster
@@ -214,7 +214,7 @@ def render_agentic_results(response, generator=None):
                     else:
                         st.info("Generator not available.")
             with bc[3]:
-                if st.button("⏰ Schedule", key=f"sched_{variant_key}", use_container_width=True):
+                if st.button(f"⏰ Schedule", key=f"sched_{variant_key}", use_container_width=True):
                     st.session_state[f"sched_show_{variant_key}"] = True
 
             # ── Inline scheduler ──

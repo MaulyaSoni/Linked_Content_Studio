@@ -479,6 +479,16 @@ What’s your experience with {request.topic}?"""
             
             self.logger.info(f"🏆 Generating hackathon post: {request.project_name}")
             
+            # Check LLM availability
+            if not self.llm_available or not self.llm:
+                self.logger.error("❌ LLM not available for hackathon post generation")
+                return HackathonPostResponse(
+                    success=False,
+                    error_message="LLM is not available. Please check that GROQ_API_KEY is set in your environment variables.",
+                    mode_used="advanced",
+                    achievement_level=request.achievement.value
+                )
+
             # Build the prompt
             prompt = HackathonPromptBuilder.build_hackathon_prompt(
                 hackathon_name=request.hackathon_name,
