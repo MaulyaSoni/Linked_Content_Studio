@@ -1,0 +1,67 @@
+D:\LinkedIn_post_generator\.venv\Lib\site-packages\langchain_core\_api\deprecation.py:25: UserWarning: Core Pydantic V1 functionality isn't compatible with Python 3.14 or greater.
+  from pydantic.v1.fields import FieldInfo as FieldInfoV1
+INFO:core.generator:🔄 Initializing LLM provider...
+INFO:core.llm:✅ LLM Provider initialized: llama-3.1-8b-instant
+INFO:core.generator:✅ LLM provider ready
+INFO:agent.InputProcessor:🤖 Agent 'InputProcessor' initialized
+INFO:tools.vision_analyzer:✅ VisionAnalyzer initialized
+INFO:tools.document_processor:✅ DocumentProcessor initialized
+INFO:tools.web_scraper:✅ WebScraper initialized
+INFO:agent.ResearchAgent:🤖 Agent 'ResearchAgent' initialized
+INFO:tools.trend_analyzer:✅ TrendAnalyzer initialized
+INFO:agent.ContentIntelligence:🤖 Agent 'ContentIntelligence' initialized
+INFO:agent.GenerationAgent:🤖 Agent 'GenerationAgent' initialized
+INFO:agent.BrandVoiceAgent:🤖 Agent 'BrandVoiceAgent' initialized
+INFO:tools.brand_analyzer:✅ BrandAnalyzer initialized
+INFO:agent.OptimizationAgent:🤖 Agent 'OptimizationAgent' initialized
+INFO:tools.engagement_predictor:✅ EngagementPredictor initialized
+INFO:tools.sentiment_analyzer:✅ SentimentAnalyzer initialized
+INFO:agents.agent_orchestrator:✅ AgentOrchestrator initialized (6-agent pipeline)
+INFO:tools.linkedin_poster:✅ LinkedInPoster initialized
+
+============================================================
+  PIPELINE VERIFICATION REPORT
+============================================================
+
+PASSED (37):
+   [OK] core.models
+   [OK] core.llm
+   [OK] core.generator
+   [OK] core.brand_dna
+   [OK] core.validation
+   [OK] core.prompts
+   [OK] agents.base_agent
+   [OK] agents.input_processor_agent
+   [OK] agents.research_agent
+   [OK] agents.content_intelligence_agent
+   [OK] agents.generation_agent
+   [OK] agents.brand_voice_agent
+   [OK] agents.optimization_agent
+   [OK] agents.agent_orchestrator
+   [OK] tools.vision_analyzer
+   [OK] tools.document_processor
+   [OK] tools.web_scraper
+   [OK] tools.trend_analyzer
+   [OK] tools.sentiment_analyzer
+   [OK] tools.engagement_predictor
+   [OK] tools.brand_analyzer
+   [OK] tools.linkedin_poster
+   [OK] chains.quality_chains
+   [OK] loaders.base
+   [OK] loaders.document
+   [OK] loaders.github_loader
+   [OK] loaders.github
+   [OK] prompts.simple_prompt
+   [OK] prompts.advanced_prompt
+   [OK] prompts.hackathon_prompt
+   [OK] prompts.base_prompt
+   [OK] prompts.specialized_prompts
+   [OK] functional: generator init
+   [OK] functional: models
+   [OK] functional: MultiModalInput
+   [OK] functional: orchestrator init
+   [OK] functional: LinkedInPoster init
+
+ALL CHECKS PASSED -- Pipeline is production-ready!
+
+============================================================

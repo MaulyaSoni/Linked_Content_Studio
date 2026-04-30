@@ -1,0 +1,19 @@
+🚀 What surprised me most while working on graph data wasn’t scale—it was uncertainty.
+
+I recently explored an open-source project that completely changed how I look at network analysis.
+
+Short takeaway 👇
+Good abstractions make complex systems usable.
+
+Would love to hear how others approach graph problems.
+
+---
+
+🔍 Ever wondered why some patterns in data stay hidden?
+
+While building a recommendation system, I learned that structure matters as much as data.
+
+Key insight:
+Better modeling beats more data.
+
+Curious to know your experience.

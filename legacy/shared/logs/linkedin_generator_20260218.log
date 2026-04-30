@@ -1,0 +1,3 @@
+{"asctime": "2026-02-18 21:39:06,110", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-18 21:41:10,689", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
+{"asctime": "2026-02-18 21:41:19,359", "name": "__main__", "levelname": "\u001b[32mINFO\u001b[0m", "message": "\u2705 LinkedIn generator initialized", "filename": "logger.py", "lineno": 130}
