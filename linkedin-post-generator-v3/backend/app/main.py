@@ -10,8 +10,8 @@ import sentry_sdk
 Base.metadata.create_all(bind=engine)
 
 # Initialize Sentry for error tracking
-if not settings.DEBUG:
-    sentry_sdk.init(dsn="your-sentry-dsn")
+if not settings.DEBUG and hasattr(settings, "SENTRY_DSN") and settings.SENTRY_DSN:
+    sentry_sdk.init(dsn=settings.SENTRY_DSN)
 
 app = FastAPI(
     title=settings.APP_NAME,

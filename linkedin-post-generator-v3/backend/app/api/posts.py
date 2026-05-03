@@ -1,23 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from datetime import datetime
 from app.db.database import get_db
 from app.models import schemas
 from app.models.models import Post, User
 from app.auth.jwt import decode_access_token
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from app.services.streamlit_compat_service import StreamlitCompatService
+from app.services.generation_service import GenerationService
+from app.services.linkedin_service import LinkedInService
 
 router = APIRouter()
 security = HTTPBearer()
-compat_service: StreamlitCompatService | None = None
 
-
-def get_compat_service() -> StreamlitCompatService:
-    """Lazily initialize heavy Streamlit-compatible generation service."""
-    global compat_service
-    if compat_service is None:
-        compat_service = StreamlitCompatService()
-    return compat_service
+# Initialize core services
+generation_service = GenerationService()
+linkedin_service = LinkedInService()
 
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
@@ -37,54 +34,117 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     
     return user
 
+@router.post("/publish", response_model=schemas.LinkedInPublishResponse)
+async def publish_post(
+    request: schemas.LinkedInPublishRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Publish a post to LinkedIn."""
+    
+    # 1. Fetch the post from DB
+    post = db.query(Post).filter(Post.id == request.post_id, Post.user_id == current_user.id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    from app.core.config import settings
+    
+    access_token = request.access_token or settings.LINKEDIN_ACCESS_TOKEN
+    user_id = request.user_id or settings.LINKEDIN_USER_ID
+    
+    if not access_token or not user_id:
+        return {
+            "success": False,
+            "error": "LinkedIn credentials missing. Please configure them in .env or connect your account."
+        }
+    
+    # 2. Publish to LinkedIn
+    result = await linkedin_service.publish_post(
+        content=post.content,
+        access_token=access_token,
+        user_id=user_id
+    )
+    
+    if result["success"]:
+        # 3. Update post status in DB
+        post.status = "published"
+        post.published_at = datetime.utcnow()
+        post.linkedin_post_id = result["post_urn"]
+        db.commit()
+        
+        return {
+            "success": True,
+            "post_urn": result["post_urn"]
+        }
+    else:
+        return {
+            "success": False,
+            "error": result.get("error", "Unknown error occurred during publishing")
+        }
 
-@router.post("/generate", response_model=schemas.CompatGenerateResponse)
+
+
+
+
+@router.post("/generate")
 async def generate_post(
     request: schemas.PostGenerateRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Generate content via Streamlit-compatible backend logic."""
-    payload = request.model_dump()
-    service = get_compat_service()
-
-    post_type = (payload.get("post_type") or "simple_topic").lower()
-    if post_type == "hackathon_project":
-        result = service.generate_hackathon_post(payload)
-        post_topic = payload.get("project_name") or payload.get("topic") or "Hackathon Post"
-    else:
-        result = service.generate_standard_post(payload)
-        post_topic = payload.get("topic") or payload.get("github_url") or payload.get("text_input") or "Generated Post"
-
-    if not result.get("success"):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=result.get("error_message", "Generation failed"),
+    """
+    Generate personalized LinkedIn post based on user profile.
+    """
+    
+    try:
+        # Generate post
+        result = await generation_service.generate_post(
+            topic=request.topic,
+            user_id=current_user.id,
+            db=db,
+            tone=request.tone if hasattr(request, 'tone') else None,
+            content_type=request.content_type if hasattr(request, 'content_type') else "simple_topic",
         )
-
-    quality = result.get("quality_score")
-    quality_value = None
-    if isinstance(quality, (int, float)):
-        quality_value = float(quality)
-    elif isinstance(quality, dict) and quality:
-        numeric_values = [v for v in quality.values() if isinstance(v, (int, float))]
-        quality_value = float(sum(numeric_values) / len(numeric_values)) if numeric_values else None
-
-    new_post = Post(
-        user_id=current_user.id,
-        topic=post_topic,
-        content=result.get("post", ""),
-        tone=payload.get("tone"),
-        audience=payload.get("audience"),
-        hashtags=result.get("hashtags_list") or [],
-        quality_score=quality_value,
-        fact_check_score=None,
-    )
-
-    db.add(new_post)
-    db.commit()
-
-    return result
+        
+        if not result["success"]:
+            raise HTTPException(
+                status_code=500,
+                detail=result.get("error", "Generation failed")
+            )
+        
+        hashtags_list = result["hashtags"]
+        hashtags_str = " ".join(hashtags_list) if hashtags_list else ""
+        
+        # Save to database
+        db_post = Post(
+            user_id=current_user.id,
+            content=result["post"],
+            hashtags=hashtags_list,
+            quality_score=result["quality_score"],
+            topic=request.topic,
+            created_at=datetime.utcnow()
+        )
+        
+        db.add(db_post)
+        db.commit()
+        db.refresh(db_post)
+        
+        return schemas.CompatGenerateResponse(
+            post=result["post"],
+            hashtags=hashtags_str,
+            hashtags_list=hashtags_list,
+            quality_score=result["quality_score"],
+            tokens_used=result["tokens_used"],
+            mode_used="personalized_advanced",
+            success=True,
+            post_id=db_post.id,
+        )
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
 
 @router.get("/history", response_model=schemas.PostListResponse)

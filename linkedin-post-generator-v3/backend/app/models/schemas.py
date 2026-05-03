@@ -110,6 +110,12 @@ class PostResponse(BaseModel):
     status: str
     created_at: datetime
     
+    @validator('hashtags', pre=True)
+    def parse_hashtags(cls, v):
+        if isinstance(v, str):
+            return v.split() if v else []
+        return v
+    
     class Config:
         from_attributes = True
 
@@ -126,7 +132,7 @@ class CompatGenerateResponse(BaseModel):
     hashtags_list: Optional[List[str]] = None
     caption: Optional[str] = None
     mode_used: str
-    quality_score: Optional[dict] = None
+    quality_score: Optional[dict | float | int] = None
     hook_options: Optional[dict] = None
     generation_time: float = 0.0
     tokens_used: int = 0
@@ -170,4 +176,13 @@ class FactCheckResult(BaseModel):
     total_claims: int
     verified_claims: int
     flagged_claims: List[dict]
-    recommendations: List[str]
+# LinkedIn Schemas
+class LinkedInPublishRequest(BaseModel):
+    post_id: int
+    access_token: Optional[str] = None
+    user_id: Optional[str] = None
+
+class LinkedInPublishResponse(BaseModel):
+    success: bool
+    post_urn: Optional[str] = None
+    error: Optional[str] = None

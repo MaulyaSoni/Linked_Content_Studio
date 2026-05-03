@@ -2,16 +2,18 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession, signIn } from 'next-auth/react';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Sparkles, Copy } from 'lucide-react';
+import { ArrowLeft, Sparkles, Copy, Linkedin, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { AUDIENCES, CONTENT_TYPES, POST_TYPES, TONES } from '@/features/post-generator/config';
 
 type GeneratedResponse = {
   success: boolean;
   post: string;
+  post_id: number;
   hashtags?: string;
   mode_used: string;
   quality_score?: Record<string, number> | number;
@@ -19,6 +21,7 @@ type GeneratedResponse = {
 
 export default function GeneratePostPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [formData, setFormData] = useState({
     post_type: 'simple_topic',
     mode: 'simple',
@@ -45,10 +48,45 @@ export default function GeneratePostPage() {
     hackathon_type: 'general',
   });
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const [generatedPost, setGeneratedPost] = useState<GeneratedResponse | null>(null);
+  const [isPublished, setIsPublished] = useState(false);
 
   const isHackathon = formData.post_type === 'hackathon_project';
   const isAdvanced = formData.post_type === 'advanced_github';
+
+  const handlePublish = async () => {
+    if (!session?.accessToken || !session?.userId) {
+      toast.error('Please connect your LinkedIn account first');
+      signIn('linkedin');
+      return;
+    }
+
+    if (!generatedPost?.post_id) {
+      toast.error('Post ID missing');
+      return;
+    }
+
+    setIsPublishing(true);
+    try {
+      const response = await api.post('/api/posts/publish', {
+        post_id: generatedPost.post_id,
+        access_token: session.accessToken,
+        user_id: session.userId,
+      });
+
+      if (response.data.success) {
+        toast.success('Published to LinkedIn!');
+        setIsPublished(true);
+      } else {
+        toast.error(response.data.error || 'Publishing failed');
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || 'Publishing failed');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -293,8 +331,22 @@ export default function GeneratePostPage() {
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <button onClick={() => setGeneratedPost(null)} className="btn-primary flex-1">
+            <div className="flex flex-wrap gap-4">
+              {!isPublished ? (
+                <button
+                  onClick={handlePublish}
+                  disabled={isPublishing}
+                  className="btn-primary flex-1 flex items-center justify-center gap-2 bg-[#0077b5] hover:bg-[#005c8e] border-none"
+                >
+                  <Linkedin size={18} />
+                  {isPublishing ? 'Publishing...' : 'Publish to LinkedIn'}
+                </button>
+              ) : (
+                <div className="flex-1 flex items-center justify-center gap-2 bg-green-100 text-green-700 font-semibold py-2 px-4 rounded-lg">
+                  Published! <ExternalLink size={16} />
+                </div>
+              )}
+              <button onClick={() => setGeneratedPost(null)} className="btn-secondary flex-1">
                 Generate Another
               </button>
               <button onClick={() => router.push('/dashboard')} className="btn-secondary flex-1">

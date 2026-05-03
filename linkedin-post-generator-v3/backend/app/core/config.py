@@ -34,6 +34,8 @@ class Settings(BaseSettings):
     LINKEDIN_CLIENT_ID: str = ""
     LINKEDIN_CLIENT_SECRET: str = ""
     LINKEDIN_REDIRECT_URI: str = "http://localhost:8000/api/auth/linkedin/callback"
+    LINKEDIN_ACCESS_TOKEN: str = ""
+    LINKEDIN_USER_ID: str = ""
     
     # Rate Limiting
     RATE_LIMIT_PER_MINUTE: int = 60
