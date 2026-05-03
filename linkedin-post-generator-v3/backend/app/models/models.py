@@ -77,6 +77,7 @@ class Post(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     topic = Column(String, nullable=False)
     content = Column(Text, nullable=False)
+    content_type = Column(String, nullable=True)
     tone = Column(String, nullable=True)
     audience = Column(String, nullable=True)
     hashtags = Column(JSON, nullable=True)

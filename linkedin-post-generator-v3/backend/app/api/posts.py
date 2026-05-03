@@ -6,14 +6,13 @@ from app.models import schemas
 from app.models.models import Post, User
 from app.auth.jwt import decode_access_token
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from app.services.generation_service import GenerationService
 from app.services.linkedin_service import LinkedInService
+from app.workflows.post_generation_workflow import run_post_generation_workflow
 
 router = APIRouter()
 security = HTTPBearer()
 
 # Initialize core services
-generation_service = GenerationService()
 linkedin_service = LinkedInService()
 
 
@@ -86,65 +85,53 @@ async def publish_post(
 
 
 
-@router.post("/generate")
+from app.services.generation_service import GenerationService
+_gen  = GenerationService()
+
+@router.post("/generate", response_model=schemas.CompatGenerateResponse)
 async def generate_post(
     request: schemas.PostGenerateRequest,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-    """
-    Generate personalized LinkedIn post based on user profile.
-    """
-    
-    try:
-        # Generate post
-        result = await generation_service.generate_post(
-            topic=request.topic,
-            user_id=current_user.id,
-            db=db,
-            tone=request.tone if hasattr(request, 'tone') else None,
-            content_type=request.content_type if hasattr(request, 'content_type') else "simple_topic",
-        )
-        
-        if not result["success"]:
-            raise HTTPException(
-                status_code=500,
-                detail=result.get("error", "Generation failed")
-            )
-        
-        hashtags_list = result["hashtags"]
-        hashtags_str = " ".join(hashtags_list) if hashtags_list else ""
-        
-        # Save to database
-        db_post = Post(
-            user_id=current_user.id,
-            content=result["post"],
-            hashtags=hashtags_list,
-            quality_score=result["quality_score"],
-            topic=request.topic,
-            created_at=datetime.utcnow()
-        )
-        
-        db.add(db_post)
-        db.commit()
-        db.refresh(db_post)
-        
-        return schemas.CompatGenerateResponse(
-            post=result["post"],
-            hashtags=hashtags_str,
-            hashtags_list=hashtags_list,
-            quality_score=result["quality_score"],
-            tokens_used=result["tokens_used"],
-            mode_used="personalized_advanced",
-            success=True,
-            post_id=db_post.id,
-        )
-    
-    except Exception as e:
+    result = await _gen.generate_post(
+        topic            = request.topic,
+        user_id          = str(current_user.id),
+        db               = db,
+        tone             = getattr(request, "tone", None),
+        content_type     = getattr(request, "content_type", "simple_topic"),
+        additional_context = getattr(request, "additional_context", ""),
+    )
+
+    if not result.get("success"):
         raise HTTPException(
-            status_code=500,
-            detail=str(e)
+            status_code = 500,
+            detail      = result.get("error", "Generation failed")
         )
+
+    # Persist to DB
+    db_post = Post(
+        user_id       = current_user.id,
+        content       = result["post"],
+        hashtags      = result.get("hashtags", []),
+        quality_score = result.get("quality_score", 50),
+        content_type  = getattr(request, "content_type", "simple_topic"),
+        topic         = request.topic,
+        created_at    = datetime.utcnow(),
+    )
+    db.add(db_post)
+    db.commit()
+    db.refresh(db_post)
+
+    return schemas.CompatGenerateResponse(
+        success       = True,
+        post          = result["post"],
+        hashtags      = " ".join(result.get("hashtags", [])),
+        quality_score = result.get("quality_score", 50),
+        tokens_used   = result.get("tokens_used", 0),
+        mode_used     = "personalized_advanced",
+        post_id       = str(db_post.id),
+    )
 
 
 @router.get("/history", response_model=schemas.PostListResponse)

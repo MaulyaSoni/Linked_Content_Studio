@@ -89,6 +89,7 @@ class PostGenerateRequest(BaseModel):
     tags_organizations: Optional[List[str]] = None
     include_hashtags: Optional[bool] = True
     include_caption: Optional[bool] = False
+    additional_context: Optional[str] = ""
     max_length: Optional[int] = 2000
     
     @validator('topic')
@@ -138,6 +139,7 @@ class CompatGenerateResponse(BaseModel):
     tokens_used: int = 0
     achievement_level: Optional[str] = None
     estimated_reach: Optional[str] = None
+    post_id: Optional[str] = None
     error_message: Optional[str] = None
 
 

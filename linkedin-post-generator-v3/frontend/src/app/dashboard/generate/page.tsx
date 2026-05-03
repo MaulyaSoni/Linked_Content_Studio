@@ -10,14 +10,17 @@ import { ArrowLeft, Sparkles, Copy, Linkedin, ExternalLink, Bot, Zap, Globe, Tar
 import Link from 'next/link';
 import { AUDIENCES, CONTENT_TYPES, POST_TYPES, TONES } from '@/features/post-generator/config';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import QualityPanel from '@/components/QualityPanel';
 
 type GeneratedResponse = {
   success: boolean;
   post: string;
-  post_id: number;
+  post_id: number | string;
   hashtags?: string;
   mode_used: string;
   quality_score?: Record<string, number> | number;
+  has_history?: boolean;
+  node_trace?: string[];
 };
 
 export default function GeneratePostPage() {
@@ -398,6 +401,12 @@ export default function GeneratePostPage() {
                         ))}
                       </div>
                     )}
+                    
+                    <QualityPanel
+                      score={qualityScore}
+                      modeUsed={generatedPost.mode_used}
+                      hasHistory={generatedPost.has_history ?? false}
+                    />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -420,6 +429,27 @@ export default function GeneratePostPage() {
                       <span className="text-xl font-bold text-foreground uppercase tracking-widest">{generatedPost.mode_used}</span>
                     </div>
                   </div>
+
+                  {/* Dev Mode Trace */}
+                  {generatedPost.node_trace && (
+                    <div className="glass-card p-4 bg-black/5 dark:bg-white/5 border-dashed border-border/50">
+                      <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-2">
+                        <Zap size={10} /> Workflow Trace (Dev Only)
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {generatedPost.node_trace.map((node, i) => (
+                          <div key={i} className="flex items-center gap-2">
+                            <span className="text-[10px] font-mono px-2 py-0.5 bg-background rounded border border-border/50">
+                              {node}
+                            </span>
+                            {i < generatedPost.node_trace!.length - 1 && (
+                              <span className="text-muted-foreground">→</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

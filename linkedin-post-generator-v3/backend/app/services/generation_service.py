@@ -13,10 +13,14 @@ class GenerationService:
     """Generate personalized posts using user profile."""
     
     def __init__(self):
+        api_key = settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY")
+        if not api_key:
+            raise ValueError("GROQ_API_KEY is missing from environment variables")
+            
         self.llm = ChatGroq(
             model="llama-3.3-70b-versatile",
             temperature=0.7,
-            api_key=settings.GROQ_API_KEY
+            api_key=api_key
         )
     
     async def generate_post(
