@@ -6,6 +6,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { Bot, ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,7 +24,6 @@ export default function LoginPage() {
       const response = await api.post('/api/auth/login', { email, password });
       const { access_token, token_type } = response.data;
       
-      // Get user profile
       const userResponse = await api.get('/api/users/profile', {
         headers: { Authorization: `Bearer ${access_token}` }
       });
@@ -38,35 +39,50 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="card w-full max-w-md"
-      >
-        <h1 className="text-3xl font-bold text-center mb-2">Welcome Back</h1>
-        <p className="text-center text-gray-600 mb-8">Sign in to continue</p>
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+      {/* Background Orbs */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-primary rounded-full mix-blend-multiply filter blur-[128px] opacity-30 animate-blob" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary rounded-full mix-blend-multiply filter blur-[128px] opacity-30 animate-blob animation-delay-2000" />
 
-        <form onSubmit={handleLogin} className="space-y-4">
+      <Link href="/" className="absolute top-6 left-6 glass-card p-3 rounded-full hover:scale-105 transition-transform">
+        <ArrowLeft className="text-foreground" size={24} />
+      </Link>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="glass-card w-full max-w-md p-8 relative z-10"
+      >
+        <div className="flex justify-center mb-6">
+          <div className="bg-gradient-to-br from-primary to-secondary p-3 rounded-2xl shadow-lg">
+            <Bot className="text-white" size={32} />
+          </div>
+        </div>
+        
+        <h1 className="text-3xl font-extrabold text-center mb-2 text-foreground">Welcome Back</h1>
+        <p className="text-center text-gray-500 dark:text-gray-400 mb-8 font-medium">Sign in to continue to Lumina AI</p>
+
+        <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
+            <label className="block text-sm font-bold mb-2 ml-2 text-foreground tracking-wide">EMAIL</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="input-field"
-              placeholder="your@email.com"
+              className="glass-input"
+              placeholder="name@company.com"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Password</label>
+            <label className="block text-sm font-bold mb-2 ml-2 text-foreground tracking-wide">PASSWORD</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="input-field"
+              className="glass-input"
               placeholder="••••••••"
               required
             />
@@ -75,17 +91,17 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="btn-primary w-full"
+            className="glass-btn-primary w-full mt-6"
           >
-            {isLoading ? 'Signing in...' : 'Sign In'}
+            {isLoading ? 'Authenticating...' : 'Sign In'}
           </button>
         </form>
 
-        <p className="text-center mt-6 text-sm text-gray-600">
+        <p className="text-center mt-8 text-sm font-medium text-gray-500 dark:text-gray-400">
           Don't have an account?{' '}
-          <a href="/auth/register" className="text-primary-600 hover:underline">
+          <Link href="/auth/register" className="text-primary hover:text-primary-light transition-colors font-bold">
             Sign up
-          </a>
+          </Link>
         </p>
       </motion.div>
     </div>

@@ -2,44 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --background: #fff7fe;
+    --foreground: #1f1924;
+    --surface: rgba(255, 255, 255, 0.4);
+    --surface-muted: rgba(255, 255, 255, 0.2);
+    --border: rgba(255, 255, 255, 0.6);
+  }
+
+  .dark {
+    --background: #11001c;
+    --foreground: #fff7fe;
+    --surface: rgba(255, 255, 255, 0.05);
+    --surface-muted: rgba(255, 255, 255, 0.02);
+    --border: rgba(255, 255, 255, 0.1);
   }
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  color: var(--foreground);
+  background-color: var(--background);
+  /* The mesh gradient effect */
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(280, 100%, 74%, 0.15) 0px, transparent 50%),
+    radial-gradient(at 50% 0%, hsla(210, 100%, 74%, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(330, 100%, 74%, 0.15) 0px, transparent 50%);
+  background-attachment: fixed;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @layer components {
-  .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+  .glass-card {
+    @apply bg-surface backdrop-blur-xl border border-[color:var(--border)] shadow-glass dark:shadow-glass-dark rounded-3xl transition-all duration-300;
   }
   
-  .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors;
+  .glass-input {
+    @apply w-full px-4 py-3 bg-surface-muted backdrop-blur-md border border-[color:var(--border)] rounded-full focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500;
   }
   
-  .input-field {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none;
+  .glass-btn-primary {
+    @apply relative overflow-hidden bg-gradient-to-r from-primary to-primary-dark text-white font-semibold py-3 px-6 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 active:translate-y-0;
   }
-  
-  .card {
-    @apply bg-white rounded-lg shadow-md p-6;
+
+  .glass-btn-secondary {
+    @apply bg-surface-muted backdrop-blur-md border border-[color:var(--border)] text-gray-800 dark:text-gray-200 font-semibold py-3 px-6 rounded-full hover:bg-surface transition-all duration-300;
   }
 }

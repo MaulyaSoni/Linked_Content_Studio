@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useSession, signIn } from 'next-auth/react';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Sparkles, Copy, Linkedin, ExternalLink } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Sparkles, Copy, Linkedin, ExternalLink, Bot, Zap, Globe, Target } from 'lucide-react';
 import Link from 'next/link';
 import { AUDIENCES, CONTENT_TYPES, POST_TYPES, TONES } from '@/features/post-generator/config';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 type GeneratedResponse = {
   success: boolean;
@@ -128,234 +129,331 @@ export default function GeneratePostPage() {
   })();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <Link href="/dashboard" className="text-primary-600 hover:underline flex items-center gap-2">
-            <ArrowLeft size={16} />
-            Back to Dashboard
+    <div className="min-h-screen relative overflow-hidden bg-background">
+      {/* Background Blobs */}
+      <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-primary rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-secondary rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-4000" />
+
+      {/* Header */}
+      <header className="sticky top-0 w-full z-50 p-4">
+        <div className="glass-card max-w-5xl mx-auto px-6 py-3 flex justify-between items-center rounded-full">
+          <Link href="/dashboard" className="glass-btn-secondary py-2 px-4 text-sm flex items-center gap-2 group">
+            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+            Back
           </Link>
+          <div className="flex items-center gap-2">
+            <Bot className="text-primary" size={24} />
+            <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">Lumina Creator</h1>
+          </div>
+          <ThemeToggle />
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Generate LinkedIn Post</h1>
-
-        {!generatedPost ? (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card">
-            <form onSubmit={handleGenerate} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium mb-2">Post Type</label>
-                <select
-                  value={formData.post_type}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      post_type: e.target.value,
-                      mode: e.target.value === 'advanced_github' ? 'advanced' : 'simple',
-                    }))
-                  }
-                  className="input-field"
-                >
-                  {POST_TYPES.map((postType) => (
-                    <option key={postType.value} value={postType.value}>
-                      {postType.label}
-                    </option>
-                  ))}
-                </select>
+      <main className="max-w-4xl mx-auto px-4 py-12 relative z-10">
+        <AnimatePresence mode="wait">
+          {!generatedPost ? (
+            <motion.div
+              key="generator-form"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              className="glass-card p-8 md:p-12"
+            >
+              <div className="mb-10 text-center">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-4">
+                  <Sparkles className="text-primary" size={16} />
+                  <span className="text-xs font-bold uppercase tracking-wider text-primary">AI Content Engine</span>
+                </div>
+                <h2 className="text-4xl font-extrabold text-foreground mb-4">What's the topic?</h2>
+                <p className="text-gray-500 dark:text-gray-400">Tell us what you want to talk about, and Lumina will do the rest.</p>
               </div>
 
-              {!isHackathon && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Content Type</label>
+              <form onSubmit={handleGenerate} className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-sm font-bold text-foreground ml-1">
+                      <Zap size={14} className="text-primary" /> POST TYPE
+                    </label>
                     <select
-                      value={formData.content_type}
-                      onChange={(e) => setFormData({ ...formData, content_type: e.target.value })}
-                      className="input-field"
+                      value={formData.post_type}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          post_type: e.target.value,
+                          mode: e.target.value === 'advanced_github' ? 'advanced' : 'simple',
+                        }))
+                      }
+                      className="glass-input appearance-none"
                     >
-                      {CONTENT_TYPES.map((contentType) => (
-                        <option key={contentType} value={contentType}>
-                          {contentType}
+                      {POST_TYPES.map((postType) => (
+                        <option key={postType.value} value={postType.value}>
+                          {postType.label}
                         </option>
                       ))}
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Topic *</label>
+                  {!isHackathon && (
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 text-sm font-bold text-foreground ml-1">
+                        <Globe size={14} className="text-primary" /> CONTENT STRATEGY
+                      </label>
+                      <select
+                        value={formData.content_type}
+                        onChange={(e) => setFormData({ ...formData, content_type: e.target.value })}
+                        className="glass-input appearance-none"
+                      >
+                        {CONTENT_TYPES.map((contentType) => (
+                          <option key={contentType} value={contentType}>
+                            {contentType}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {!isHackathon && (
+                  <div className="space-y-2">
+                    <label className="block text-sm font-bold text-foreground ml-1 uppercase">Main Topic *</label>
                     <input
                       type="text"
                       value={formData.topic}
                       onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-                      className="input-field"
+                      className="glass-input"
+                      placeholder="e.g. The future of AI Agents in software engineering"
                       required
                     />
                   </div>
-                </>
-              )}
+                )}
 
-              {isAdvanced && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">GitHub URL (optional)</label>
-                    <input
-                      type="text"
-                      value={formData.github_url}
-                      onChange={(e) => setFormData({ ...formData, github_url: e.target.value })}
-                      className="input-field"
-                    />
+                {isAdvanced && (
+                  <div className="grid grid-cols-1 gap-8">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-bold text-foreground ml-1 uppercase">GitHub Repository URL</label>
+                      <input
+                        type="text"
+                        value={formData.github_url}
+                        onChange={(e) => setFormData({ ...formData, github_url: e.target.value })}
+                        className="glass-input"
+                        placeholder="https://github.com/user/repo"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-bold text-foreground ml-1 uppercase">Detailed Input / Code Snippets</label>
+                      <textarea
+                        value={formData.text_input}
+                        onChange={(e) => setFormData({ ...formData, text_input: e.target.value })}
+                        className="glass-input min-h-[120px]"
+                        placeholder="Paste any specific text or code you want to analyze..."
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Custom Text (optional)</label>
-                    <textarea
-                      value={formData.text_input}
-                      onChange={(e) => setFormData({ ...formData, text_input: e.target.value })}
-                      className="input-field"
-                      rows={3}
-                    />
+                )}
+
+                {isHackathon && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-bold text-foreground ml-1 uppercase">Hackathon Name</label>
+                      <input
+                        type="text"
+                        value={formData.hackathon_name}
+                        onChange={(e) => setFormData({ ...formData, hackathon_name: e.target.value })}
+                        className="glass-input"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-bold text-foreground ml-1 uppercase">Project Name</label>
+                      <input
+                        type="text"
+                        value={formData.project_name}
+                        onChange={(e) => setFormData({ ...formData, project_name: e.target.value })}
+                        className="glass-input"
+                        required
+                      />
+                    </div>
+                    <div className="md:col-span-2 space-y-2">
+                      <label className="block text-sm font-bold text-foreground ml-1 uppercase">Problem Statement</label>
+                      <textarea
+                        value={formData.problem_statement}
+                        onChange={(e) => setFormData({ ...formData, problem_statement: e.target.value })}
+                        className="glass-input min-h-[100px]"
+                        required
+                      />
+                    </div>
                   </div>
-                </>
-              )}
+                )}
 
-              {isHackathon && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Hackathon Name *</label>
-                    <input
-                      type="text"
-                      value={formData.hackathon_name}
-                      onChange={(e) => setFormData({ ...formData, hackathon_name: e.target.value })}
-                      className="input-field"
-                      required
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-sm font-bold text-foreground ml-1">
+                      <Bot size={14} className="text-primary" /> WRITING TONE
+                    </label>
+                    <select
+                      value={formData.tone}
+                      onChange={(e) => setFormData({ ...formData, tone: e.target.value })}
+                      className="glass-input appearance-none"
+                    >
+                      {TONES.map((tone) => (
+                        <option key={tone} value={tone}>
+                          {tone}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Project Name *</label>
-                    <input
-                      type="text"
-                      value={formData.project_name}
-                      onChange={(e) => setFormData({ ...formData, project_name: e.target.value })}
-                      className="input-field"
-                      required
-                    />
+
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-sm font-bold text-foreground ml-1">
+                      <Target size={14} className="text-primary" /> AUDIANCE
+                    </label>
+                    <select
+                      value={formData.audience}
+                      onChange={(e) => setFormData({ ...formData, audience: e.target.value })}
+                      className="glass-input appearance-none"
+                    >
+                      {AUDIENCES.map((audience) => (
+                        <option key={audience} value={audience}>
+                          {audience}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Problem Statement *</label>
-                    <textarea
-                      value={formData.problem_statement}
-                      onChange={(e) => setFormData({ ...formData, problem_statement: e.target.value })}
-                      className="input-field"
-                      rows={3}
-                      required
-                    />
-                  </div>
-                </>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Tone</label>
-                <select
-                  value={formData.tone}
-                  onChange={(e) => setFormData({ ...formData, tone: e.target.value })}
-                  className="input-field"
-                >
-                  {TONES.map((tone) => (
-                    <option key={tone} value={tone}>
-                      {tone}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Target Audience</label>
-                <select
-                  value={formData.audience}
-                  onChange={(e) => setFormData({ ...formData, audience: e.target.value })}
-                  className="input-field"
-                >
-                  {AUDIENCES.map((audience) => (
-                    <option key={audience} value={audience}>
-                      {audience}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Additional Context (optional)</label>
-                <textarea
-                  value={formData.context}
-                  onChange={(e) => setFormData({ ...formData, context: e.target.value })}
-                  className="input-field"
-                  rows={4}
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isGenerating}
-                className="btn-primary w-full flex items-center justify-center gap-2"
-              >
-                <Sparkles size={18} />
-                {isGenerating ? 'Generating...' : 'Generate Post'}
-              </button>
-            </form>
-          </motion.div>
-        ) : (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-            <div className="card">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Generated Post</h2>
-                <button onClick={copyToClipboard} className="btn-secondary flex items-center gap-2">
-                  <Copy size={16} />
-                  Copy
-                </button>
-              </div>
-
-              <div className="bg-gray-50 p-6 rounded-lg whitespace-pre-wrap mb-4">{generatedPost.post}</div>
-              {generatedPost.hashtags && (
-                <div className="bg-white border p-4 rounded-lg whitespace-pre-wrap mb-4">{generatedPost.hashtags}</div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-600">Quality Score:</span>
-                  <span className="ml-2 font-semibold">{qualityScore}%</span>
                 </div>
-                <div>
-                  <span className="text-gray-600">Mode:</span>
-                  <span className="ml-2 font-semibold">{generatedPost.mode_used}</span>
-                </div>
-              </div>
-            </div>
 
-            <div className="flex flex-wrap gap-4">
-              {!isPublished ? (
+                <div className="space-y-2">
+                  <label className="block text-sm font-bold text-foreground ml-1 uppercase">Additional Context</label>
+                  <textarea
+                    value={formData.context}
+                    onChange={(e) => setFormData({ ...formData, context: e.target.value })}
+                    className="glass-input min-h-[100px]"
+                    placeholder="Anything else we should know? Specific keywords to include?"
+                  />
+                </div>
+
                 <button
-                  onClick={handlePublish}
-                  disabled={isPublishing}
-                  className="btn-primary flex-1 flex items-center justify-center gap-2 bg-[#0077b5] hover:bg-[#005c8e] border-none"
+                  type="submit"
+                  disabled={isGenerating}
+                  className="glass-btn-primary w-full py-5 text-xl flex items-center justify-center gap-3 shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <Linkedin size={18} />
-                  {isPublishing ? 'Publishing...' : 'Publish to LinkedIn'}
+                  {isGenerating ? (
+                    <>
+                      <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                      Crafting your post...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={24} />
+                      Generate Masterpiece
+                    </>
+                  )}
                 </button>
-              ) : (
-                <div className="flex-1 flex items-center justify-center gap-2 bg-green-100 text-green-700 font-semibold py-2 px-4 rounded-lg">
-                  Published! <ExternalLink size={16} />
+              </form>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="generator-result"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-8"
+            >
+              <div className="glass-card p-1">
+                <div className="bg-surface/50 rounded-[22px] p-8 md:p-12">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                    <div>
+                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/10 text-green-500 rounded-full mb-3">
+                        <Zap size={14} />
+                        <span className="text-xs font-bold uppercase tracking-wider">Ready to Post</span>
+                      </div>
+                      <h2 className="text-4xl font-extrabold text-foreground">Draft Created</h2>
+                    </div>
+                    <div className="flex gap-3">
+                      <button 
+                        onClick={copyToClipboard} 
+                        className="glass-btn-secondary flex items-center gap-2 px-6"
+                      >
+                        <Copy size={18} />
+                        Copy
+                      </button>
+                      <button 
+                        onClick={() => setGeneratedPost(null)} 
+                        className="glass-btn-secondary"
+                      >
+                        Start Over
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="glass-card bg-surface-muted/50 p-8 md:p-10 mb-8 relative group">
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold">PREVIEW</div>
+                    </div>
+                    <div className="whitespace-pre-wrap text-lg text-foreground leading-relaxed font-medium">
+                      {generatedPost.post}
+                    </div>
+                    {generatedPost.hashtags && (
+                      <div className="mt-8 pt-8 border-t border-border/50 flex flex-wrap gap-2">
+                        {generatedPost.hashtags.split(' ').map((tag, i) => (
+                          <span key={i} className="text-primary font-bold hover:underline cursor-default">{tag}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="glass-card p-6 flex justify-between items-center bg-gradient-to-br from-primary/5 to-transparent">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary">
+                          <Target size={24} />
+                        </div>
+                        <span className="font-bold text-gray-500 dark:text-gray-400">QUALITY SCORE</span>
+                      </div>
+                      <span className="text-3xl font-black text-primary">{qualityScore}%</span>
+                    </div>
+                    <div className="glass-card p-6 flex justify-between items-center">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-secondary/20 rounded-2xl flex items-center justify-center text-secondary">
+                          <Bot size={24} />
+                        </div>
+                        <span className="font-bold text-gray-500 dark:text-gray-400">AI MODE</span>
+                      </div>
+                      <span className="text-xl font-bold text-foreground uppercase tracking-widest">{generatedPost.mode_used}</span>
+                    </div>
+                  </div>
                 </div>
-              )}
-              <button onClick={() => setGeneratedPost(null)} className="btn-secondary flex-1">
-                Generate Another
-              </button>
-              <button onClick={() => router.push('/dashboard')} className="btn-secondary flex-1">
-                Back to Dashboard
-              </button>
-            </div>
-          </motion.div>
-        )}
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-6">
+                {!isPublished ? (
+                  <button
+                    onClick={handlePublish}
+                    disabled={isPublishing}
+                    className="glass-btn-primary flex-1 flex items-center justify-center gap-3 py-6 text-xl bg-[#0077b5] border-none hover:bg-[#005c8e] shadow-xl"
+                  >
+                    <Linkedin size={24} />
+                    {isPublishing ? 'Publishing...' : 'Publish directly to LinkedIn'}
+                  </button>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center gap-3 py-6 text-xl bg-green-500/20 text-green-500 font-bold rounded-3xl border border-green-500/30">
+                    <CheckCircle className="animate-bounce" size={24} />
+                    Successfully Published!
+                    <ExternalLink size={18} />
+                  </div>
+                )}
+                <Link 
+                  href="/dashboard" 
+                  className="glass-btn-secondary flex items-center justify-center gap-2 px-10 py-6 text-xl font-bold"
+                >
+                  Return to Hub
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );
 }
+
+// Add this at the bottom for the missing icon if not imported
+import { CheckCircle } from 'lucide-react';
