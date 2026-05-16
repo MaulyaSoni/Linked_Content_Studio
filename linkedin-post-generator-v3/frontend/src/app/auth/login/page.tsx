@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Bot, ArrowLeft } from 'lucide-react';
+import { formatError } from '@/lib/utils';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,7 +33,7 @@ export default function LoginPage() {
       toast.success('Login successful!');
       router.push('/dashboard');
     } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Login failed');
+      toast.error(formatError(error));
     } finally {
       setIsLoading(false);
     }

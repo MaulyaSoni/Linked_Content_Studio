@@ -5,22 +5,17 @@ export const POST_TYPES = [
 ];
 
 export const CONTENT_TYPES = [
-  'educational',
-  'build_in_public',
-  'hot_take',
-  'founder_lesson',
-  'github_showcase',
-  'ai_insights',
-  'learning_share',
+  'simple_topic',
+  'advanced_github',
+  'hackathon_project',
+  'thought_leadership',
 ];
 
 export const TONES = [
   'professional',
   'casual',
-  'enthusiastic',
-  'thoughtful',
-  'bold',
-  'conversational',
+  'humorous',
+  'inspirational',
 ];
 
 export const AUDIENCES = [

@@ -18,6 +18,8 @@ from sqlalchemy.orm import Session
 
 from app.models.models import Post
 from app.services.user_profile_analyzer import UserProfileAnalyzer
+from app.services.advanced_prompt_builder import AdvancedPromptBuilder
+from app.tools.web_search_tool import WebSearchTool
 
 
 # ============================================================================
@@ -180,6 +182,11 @@ async def generate_raw_draft(state: PostGenerationState) -> PostGenerationState:
     ctype    = state["content_type"]
     extra    = state.get("additional_context", "")
 
+    # ── web search context (FEATURE 1)
+    search_tool = WebSearchTool()
+    web_context = await search_tool.search_topic_context(topic)
+    context_block = search_tool.format_for_prompt(web_context)
+
     # ── memory injection (only what exists)
     memory_block = ""
     if memory:
@@ -226,47 +233,29 @@ HUMAN WRITING RULES (follow these — they prevent AI detection):
   knows exactly what they think — not crafted by committee.
 """
 
-    # ── content type framing
-    type_frames = {
-        "simple_topic":        f"Write a LinkedIn post about: {topic}",
-        "advanced_github":     f"Write a LinkedIn post about a GitHub project: {topic}. Show the build, the problem it solves, and one real learning.",
-        "hackathon_project":   f"Write a LinkedIn post celebrating a hackathon: {topic}. Show the rush, the build, the result. Make it feel real.",
-        "thought_leadership":  f"Write a LinkedIn post with a strong perspective on: {topic}. Take a real stance. Don't sit on the fence.",
-    }
-    frame = type_frames.get(ctype, type_frames["simple_topic"])
+    # ── Build base prompt using AdvancedPromptBuilder
+    base_prompt = AdvancedPromptBuilder.build_customized_prompt(
+        topic=topic,
+        user_profile=profile,
+        tone_override=state.get("tone_override"),
+        content_type=ctype,
+        additional_context=extra
+    )
 
     prompt = f"""
-You are ghostwriting a LinkedIn post for a specific person.
-Your job: sound like a human who actually lived this — not an AI describing it.
+{base_prompt}
 
 ══════════════════════════════════════
-USER VOICE
+ADDITIONAL ANTI-AI INSTRUCTIONS
 ══════════════════════════════════════
-Tone:          {tone}
-Vocabulary:    {profile.get('vocabulary_level', 'intermediate')}
-Personality:   {profile.get('personality', 'balanced')}
-Avg sentence:  {profile.get('sentence_patterns', {}).get('avg_length', 15)} words
-Storytelling:  {profile.get('storytelling_style', 'mixed')}
-Emojis:        {profile.get('emoji_usage', {}).get('frequency', 'moderate')}
-CTA style:     {profile.get('cta_style', 'question')}
-Audience:      {profile.get('audience_connection', 'direct')}
-
 {memory_block}
+{context_block}
 
-══════════════════════════════════════
-HOOK INSTRUCTION
-══════════════════════════════════════
+HOOK INSTRUCTION:
 {hook_instruction}
 
-══════════════════════════════════════
 {imperfection_rules}
-══════════════════════════════════════
 
-TASK: {frame}
-{f'Extra context: {extra}' if extra else ''}
-
-Length: 150–250 words.
-End with 3-5 hashtags on a new line.
 Write only the post. Start immediately.
 """
 
@@ -655,6 +644,11 @@ async def run_post_generation_workflow(
 
     try:
         final_state = await _GRAPH.ainvoke(initial_state)
+
+        import logging
+        logging.info(f"[WORKFLOW] Nodes ran: {final_state['node_trace']}")
+        logging.info(f"[WORKFLOW] Quality: {final_state['quality_score']}")
+        logging.info(f"[WORKFLOW] Has history: {final_state['has_history']}")
 
         return {
             "success":              True,

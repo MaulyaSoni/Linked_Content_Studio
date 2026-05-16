@@ -1,16 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signIn } from 'next-auth/react';
 import { api } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Sparkles, Copy, Linkedin, ExternalLink, Bot, Zap, Globe, Target } from 'lucide-react';
+import { ArrowLeft, Sparkles, Copy, Linkedin, ExternalLink, Bot, Zap, Globe, Target, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { AUDIENCES, CONTENT_TYPES, POST_TYPES, TONES } from '@/features/post-generator/config';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import QualityPanel from '@/components/QualityPanel';
+import { useGenerateStream } from '@/features/generate/useGenerateStream';
+import { GenerationProgress } from '@/components/GenerationProgress';
+import { formatError } from '@/lib/utils';
+import { useAuthStore } from '@/stores/authStore';
 
 type GeneratedResponse = {
   success: boolean;
@@ -26,6 +30,7 @@ type GeneratedResponse = {
 export default function GeneratePostPage() {
   const router = useRouter();
   const { data: session } = useSession();
+  const token = useAuthStore((state) => state.token);
   const [formData, setFormData] = useState({
     post_type: 'simple_topic',
     mode: 'simple',
@@ -55,6 +60,42 @@ export default function GeneratePostPage() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [generatedPost, setGeneratedPost] = useState<GeneratedResponse | null>(null);
   const [isPublished, setIsPublished] = useState(false);
+
+  // Streaming Hook
+  const { 
+    generate: startStreaming, 
+    isStreaming, 
+    currentStep, 
+    stepMessage, 
+    result: streamResult, 
+    error: streamError 
+  } = useGenerateStream(token);
+
+  // Sync stream result to generatedPost state
+  useEffect(() => {
+    if (streamResult) {
+      setGeneratedPost({
+        success: true,
+        post: streamResult.post,
+        hashtags: streamResult.hashtags,
+        quality_score: streamResult.quality_score,
+        post_id: streamResult.post_id,
+        mode_used: streamResult.mode_used,
+        node_trace: streamResult.node_trace,
+        has_history: streamResult.has_history,
+      });
+      toast.success('Post generated successfully!');
+      setIsGenerating(false);
+    }
+  }, [streamResult]);
+
+  // Handle stream errors
+  useEffect(() => {
+    if (streamError) {
+      toast.error(formatError(streamError));
+      setIsGenerating(false);
+    }
+  }, [streamError]);
 
   const isHackathon = formData.post_type === 'hackathon_project';
   const isAdvanced = formData.post_type === 'advanced_github';
@@ -95,26 +136,19 @@ export default function GeneratePostPage() {
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsGenerating(true);
+    setGeneratedPost(null);
 
-    try {
-      const payload =
-        formData.post_type === 'hackathon_project'
-          ? {
-              ...formData,
-              topic: formData.project_name || formData.topic,
-              tech_stack: formData.tech_stack_text.split(',').map((item) => item.trim()).filter(Boolean),
-              key_features: formData.key_features_text.split('\n').map((item) => item.trim()).filter(Boolean),
-            }
-          : formData;
+    const payload =
+      formData.post_type === 'hackathon_project'
+        ? {
+            ...formData,
+            topic: formData.project_name || formData.topic,
+            tech_stack: formData.tech_stack_text.split(',').map((item) => item.trim()).filter(Boolean),
+            key_features: formData.key_features_text.split('\n').map((item) => item.trim()).filter(Boolean),
+          }
+        : formData;
 
-      const response = await api.post('/api/posts/generate', payload);
-      setGeneratedPost(response.data);
-      toast.success('Post generated successfully!');
-    } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Generation failed');
-    } finally {
-      setIsGenerating(false);
-    }
+    await startStreaming(payload as any);
   };
 
   const copyToClipboard = () => {
@@ -334,6 +368,10 @@ export default function GeneratePostPage() {
                   />
                 </div>
 
+                {isStreaming && (
+                  <GenerationProgress step={currentStep} message={stepMessage} />
+                )}
+
                 <button
                   type="submit"
                   disabled={isGenerating}
@@ -484,6 +522,3 @@ export default function GeneratePostPage() {
     </div>
   );
 }
-
-// Add this at the bottom for the missing icon if not imported
-import { CheckCircle } from 'lucide-react';

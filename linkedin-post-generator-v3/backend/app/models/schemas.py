@@ -75,13 +75,13 @@ class StyleProfileResponse(BaseModel):
 
 # Post Schemas
 class PostGenerateRequest(BaseModel):
+    topic: str
     post_type: Optional[str] = "simple_topic"  # simple_topic | advanced_github | hackathon_project
     mode: Optional[str] = "simple"
-    topic: Optional[str] = ""
-    tone: Optional[str] = "professional"
+    tone: Optional[str] = None
     audience: Optional[str] = None
     context: Optional[str] = None
-    content_type: Optional[str] = "general"
+    content_type: Optional[str] = "simple_topic"
     github_url: Optional[str] = None
     text_input: Optional[str] = None
     user_key_message: Optional[str] = None
@@ -94,8 +94,8 @@ class PostGenerateRequest(BaseModel):
     
     @validator('topic')
     def topic_not_empty(cls, v):
-        if v is None:
-            return ""
+        if not v or not v.strip():
+            raise ValueError('topic cannot be empty')
         return v.strip()
 
 
@@ -121,6 +121,12 @@ class PostResponse(BaseModel):
         from_attributes = True
 
 
+class PostUpdate(BaseModel):
+    content: Optional[str] = None
+    hashtags: Optional[List[str]] = None
+    topic: Optional[str] = None
+
+
 class PostListResponse(BaseModel):
     posts: List[PostResponse]
     total: int
@@ -141,6 +147,8 @@ class CompatGenerateResponse(BaseModel):
     estimated_reach: Optional[str] = None
     post_id: Optional[str] = None
     error_message: Optional[str] = None
+    node_trace: Optional[List[str]] = None
+    has_history: Optional[bool] = None
 
 
 # Image Schemas

@@ -5,9 +5,11 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Send, CheckCircle, AlertTriangle, Calendar, Award, Bot, Linkedin } from 'lucide-react';
+import { ArrowLeft, Send, CheckCircle, AlertTriangle, Calendar, Award, Bot, Linkedin, Edit3, Save, X } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { formatError } from '@/lib/utils';
+import toast from 'react-hot-toast';
 
 export default function PostViewPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -16,6 +18,12 @@ export default function PostViewPage({ params }: { params: { id: string } }) {
   const [publishing, setPublishing] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(false);
   const [error, setError] = useState('');
+  
+  // Edit state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState('');
+  const [editedHashtags, setEditedHashtags] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchPost();
@@ -25,6 +33,8 @@ export default function PostViewPage({ params }: { params: { id: string } }) {
     try {
       const response = await api.get(`/api/posts/${params.id}`);
       setPost(response.data);
+      setEditedContent(response.data.content);
+      setEditedHashtags(response.data.hashtags || []);
     } catch (err: any) {
       console.error('Failed to fetch post:', err);
       setError('Failed to load the post. It may have been deleted or does not exist.');
@@ -34,6 +44,27 @@ export default function PostViewPage({ params }: { params: { id: string } }) {
   };
 
   const { data: session } = useSession();
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError('');
+    
+    try {
+      const response = await api.put(`/api/posts/${params.id}`, {
+        content: editedContent,
+        hashtags: editedHashtags
+      });
+      
+      setPost(response.data);
+      setIsEditing(false);
+      toast.success('Post updated successfully!');
+    } catch (err: any) {
+      setError(formatError(err));
+      toast.error('Failed to update post');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handlePublish = async () => {
     setPublishing(true);
@@ -51,16 +82,24 @@ export default function PostViewPage({ params }: { params: { id: string } }) {
       if (response.data.success) {
         setPublishSuccess(true);
         setPost({ ...post, status: 'published' });
+        toast.success('Published to LinkedIn!');
       } else {
-        setError(response.data.error || 'Failed to publish post');
+        setError(formatError(response.data.error || 'Failed to publish post'));
       }
       
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to publish post to LinkedIn');
+      setError(formatError(err));
     } finally {
       setPublishing(false);
     }
   };
+
+  const qualityScore = (() => {
+    if (!post?.quality_score) return 0;
+    if (typeof post.quality_score === 'number') return Math.round(post.quality_score);
+    const values = Object.values(post.quality_score).filter((value) => typeof value === 'number');
+    return values.length ? Math.round(values.reduce((sum: number, value: any) => sum + value, 0) / values.length) : 0;
+  })();
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -91,7 +130,7 @@ export default function PostViewPage({ params }: { params: { id: string } }) {
             <AlertTriangle size={40} />
           </div>
           <h2 className="text-2xl font-black text-foreground mb-4 uppercase tracking-tight">Post Not Found</h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-10 leading-relaxed">{error || "We couldn't find the requested content."}</p>
+          <p className="text-gray-500 dark:text-gray-400 mb-10 leading-relaxed">{formatError(error) || "We couldn't find the requested content."}</p>
           <Link href="/dashboard" className="glass-btn-primary w-full inline-block">
             Back to Hub
           </Link>
@@ -148,34 +187,73 @@ export default function PostViewPage({ params }: { params: { id: string } }) {
                   </div>
                   <div className="flex items-center gap-2">
                     <Award size={16} className="text-primary" />
-                    Quality: {post.quality_score?.toFixed(0) || 0}%
+                    Quality: {qualityScore}%
                   </div>
                 </div>
               </div>
               
-              <button 
-                onClick={handlePublish}
-                disabled={publishing || publishSuccess || post.status === 'published'}
-                className={`flex items-center gap-3 py-4 px-8 rounded-2xl font-black uppercase tracking-widest text-sm transition-all shadow-xl active:scale-95 ${
-                  publishSuccess || post.status === 'published' 
-                    ? 'bg-green-500/20 text-green-500 border border-green-500/30' 
-                    : 'glass-btn-primary bg-[#0077b5] border-none'
-                }`}
-              >
-                {publishing ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : publishSuccess || post.status === 'published' ? (
+              <div className="flex flex-wrap gap-4">
+                {isEditing ? (
                   <>
-                    <CheckCircle size={20} />
-                    Published
+                    <button 
+                      onClick={() => setIsEditing(false)}
+                      disabled={saving}
+                      className="flex items-center gap-2 py-4 px-6 rounded-2xl font-black uppercase tracking-widest text-sm transition-all glass-btn-secondary border-red-500/30 text-red-500"
+                    >
+                      <X size={20} />
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="flex items-center gap-2 py-4 px-8 rounded-2xl font-black uppercase tracking-widest text-sm transition-all glass-btn-primary"
+                    >
+                      {saving ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <Save size={20} />
+                          Save Changes
+                        </>
+                      )}
+                    </button>
                   </>
                 ) : (
                   <>
-                    <Linkedin size={20} />
-                    Post to LinkedIn
+                    <button 
+                      onClick={() => setIsEditing(true)}
+                      disabled={post.status === 'published'}
+                      className="flex items-center gap-2 py-4 px-6 rounded-2xl font-black uppercase tracking-widest text-sm transition-all glass-btn-secondary"
+                    >
+                      <Edit3 size={20} />
+                      Edit Post
+                    </button>
+                    <button 
+                      onClick={handlePublish}
+                      disabled={publishing || publishSuccess || post.status === 'published'}
+                      className={`flex items-center gap-3 py-4 px-8 rounded-2xl font-black uppercase tracking-widest text-sm transition-all shadow-xl active:scale-95 ${
+                        publishSuccess || post.status === 'published' 
+                          ? 'bg-green-500/20 text-green-500 border border-green-500/30' 
+                          : 'glass-btn-primary bg-[#0077b5] border-none'
+                      }`}
+                    >
+                      {publishing ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : publishSuccess || post.status === 'published' ? (
+                        <>
+                          <CheckCircle size={20} />
+                          Published
+                        </>
+                      ) : (
+                        <>
+                          <Linkedin size={20} />
+                          Post to LinkedIn
+                        </>
+                      )}
+                    </button>
                   </>
                 )}
-              </button>
+              </div>
             </div>
           </div>
 
@@ -183,22 +261,41 @@ export default function PostViewPage({ params }: { params: { id: string } }) {
           <div className="glass-card overflow-hidden">
             <div className="bg-surface/30 backdrop-blur-md p-10 md:p-16 border-b border-border/50">
               <div className="max-w-none prose dark:prose-invert">
-                <div className="whitespace-pre-wrap text-xl text-foreground leading-[1.8] font-medium selection:bg-primary selection:text-white">
-                  {post.content}
-                </div>
+                {isEditing ? (
+                  <textarea
+                    value={editedContent}
+                    onChange={(e) => setEditedContent(e.target.value)}
+                    className="w-full h-[400px] bg-transparent text-xl text-foreground leading-[1.8] font-medium focus:outline-none resize-none border-none p-0"
+                    placeholder="Write your post content here..."
+                  />
+                ) : (
+                  <div className="whitespace-pre-wrap text-xl text-foreground leading-[1.8] font-medium selection:bg-primary selection:text-white">
+                    {post.content}
+                  </div>
+                )}
               </div>
             </div>
             
-            {post.hashtags && post.hashtags.length > 0 && (
+            {(post.hashtags && post.hashtags.length > 0 || isEditing) && (
               <div className="p-8 bg-surface-muted/30">
                 <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-4 ml-1">Optimized Hashtags</h3>
-                <div className="flex flex-wrap gap-3">
-                  {post.hashtags.map((tag: string, i: number) => (
-                    <span key={i} className="px-4 py-2 bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-default rounded-xl font-bold text-sm">
-                      #{tag.replace('#', '')}
-                    </span>
-                  ))}
-                </div>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={editedHashtags.join(' ')}
+                    onChange={(e) => setEditedHashtags(e.target.value.split(' ').filter(tag => tag.trim() !== ''))}
+                    className="w-full bg-primary/5 border border-primary/20 rounded-xl px-4 py-3 text-primary font-bold text-sm focus:outline-none focus:border-primary/50"
+                    placeholder="Enter hashtags separated by spaces (e.g., #ai #tech)"
+                  />
+                ) : (
+                  <div className="flex flex-wrap gap-3">
+                    {post.hashtags.map((tag: string, i: number) => (
+                      <span key={i} className="px-4 py-2 bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-default rounded-xl font-bold text-sm">
+                        #{tag.replace('#', '')}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

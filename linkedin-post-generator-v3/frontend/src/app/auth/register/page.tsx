@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Bot, ArrowLeft } from 'lucide-react';
+import { formatError } from '@/lib/utils';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -37,7 +38,7 @@ export default function RegisterPage() {
       toast.success('Account created successfully!');
       router.push('/dashboard');
     } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Registration failed');
+      toast.error(formatError(error));
     } finally {
       setIsLoading(false);
     }

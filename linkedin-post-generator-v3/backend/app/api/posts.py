@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from datetime import datetime
+import asyncio
+import json
 from app.db.database import get_db
 from app.models import schemas
 from app.models.models import Post, User
@@ -85,52 +88,115 @@ async def publish_post(
 
 
 
-from app.services.generation_service import GenerationService
-_gen  = GenerationService()
-
 @router.post("/generate", response_model=schemas.CompatGenerateResponse)
 async def generate_post(
     request: schemas.PostGenerateRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    result = await _gen.generate_post(
-        topic            = request.topic,
-        user_id          = str(current_user.id),
-        db               = db,
-        tone             = getattr(request, "tone", None),
-        content_type     = getattr(request, "content_type", "simple_topic"),
-        additional_context = getattr(request, "additional_context", ""),
+    """Generate a LinkedIn post using the workflow."""
+    result = await run_post_generation_workflow(
+        user_id            = str(current_user.id),
+        topic              = request.topic,
+        db                 = db,
+        content_type       = request.content_type,
+        tone_override      = request.tone,
+        additional_context = request.additional_context,
     )
-
-    if not result.get("success"):
+    
+    if result["success"]:
+        # Save to database
+        db_post = Post(
+            user_id=current_user.id,
+            content=result["post"],
+            hashtags=result["hashtags"],
+            quality_score=result["quality_score"],
+            content_type=request.content_type,
+            topic=request.topic,
+            created_at=datetime.utcnow(),
+        )
+        db.add(db_post)
+        db.commit()
+        db.refresh(db_post)
+        
+        return {
+            "success": True,
+            "post": result["post"],
+            "hashtags": result["hashtags"],
+            "quality_score": result["quality_score"],
+            "post_id": str(db_post.id),
+            "mode_used": result["mode_used"],
+            "tokens_used": result.get("tokens_used", 0),
+            "node_trace": result.get("node_trace"),
+            "has_history": result.get("has_history")
+        }
+    else:
         raise HTTPException(
-            status_code = 500,
-            detail      = result.get("error", "Generation failed")
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=result.get("error", "Generation failed")
         )
 
-    # Persist to DB
-    db_post = Post(
-        user_id       = current_user.id,
-        content       = result["post"],
-        hashtags      = result.get("hashtags", []),
-        quality_score = result.get("quality_score", 50),
-        content_type  = getattr(request, "content_type", "simple_topic"),
-        topic         = request.topic,
-        created_at    = datetime.utcnow(),
-    )
-    db.add(db_post)
-    db.commit()
-    db.refresh(db_post)
 
-    return schemas.CompatGenerateResponse(
-        success       = True,
-        post          = result["post"],
-        hashtags      = " ".join(result.get("hashtags", [])),
-        quality_score = result.get("quality_score", 50),
-        tokens_used   = result.get("tokens_used", 0),
-        mode_used     = "personalized_advanced",
-        post_id       = str(db_post.id),
+@router.post("/generate/stream")
+async def generate_post_stream(
+    request: schemas.PostGenerateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Streaming version — sends Server-Sent Events with node progress.
+    """
+
+    async def event_generator():
+        # Step signals
+        steps = [
+            ("analyzing",  "Analyzing your writing style..."),
+            ("researching","Researching the topic..."),
+            ("drafting",   "Writing first draft..."),
+            ("critiquing", "Reviewing for authenticity..."),
+            ("polishing",  "Polishing final post..."),
+        ]
+
+        for step_id, message in steps:
+            yield f"data: {json.dumps({'type': 'progress', 'step': step_id, 'message': message})}\n\n"
+            await asyncio.sleep(0.1)
+
+        # Run actual workflow
+        result = await run_post_generation_workflow(
+            user_id            = str(current_user.id),
+            topic              = request.topic,
+            db                 = db,
+            content_type       = getattr(request, "content_type", "simple_topic"),
+            tone_override      = getattr(request, "tone", None),
+            additional_context = getattr(request, "additional_context", ""),
+        )
+
+        if result["success"]:
+            # Save to DB
+            db_post = Post(
+                user_id       = current_user.id,
+                content       = result["post"],
+                hashtags      = result["hashtags"],
+                quality_score = result["quality_score"],
+                content_type  = getattr(request, "content_type", "simple_topic"),
+                topic         = request.topic,
+                created_at    = datetime.utcnow(),
+            )
+            db.add(db_post)
+            db.commit()
+            db.refresh(db_post)
+
+            # Send final result
+            yield f"data: {json.dumps({'type': 'result', 'data': {'post': result['post'], 'hashtags': result['hashtags'], 'quality_score': result['quality_score'], 'post_id': str(db_post.id), 'mode_used': result['mode_used'], 'node_trace': result.get('node_trace'), 'has_history': result.get('has_history')}})}\n\n"
+        else:
+            yield f"data: {json.dumps({'type': 'error', 'message': result.get('error', 'Generation failed')})}\n\n"
+
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
 
@@ -160,6 +226,33 @@ async def get_post(
     post = db.query(Post).filter(Post.id == post_id, Post.user_id == current_user.id).first()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
+    
+    return post
+
+
+@router.put("/{post_id}", response_model=schemas.PostResponse)
+async def update_post(
+    post_id: int,
+    request: schemas.PostUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update a specific post."""
+    
+    post = db.query(Post).filter(Post.id == post_id, Post.user_id == current_user.id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    if request.content is not None:
+        post.content = request.content
+    if request.hashtags is not None:
+        # Store as space-separated string if that's how it's stored in DB
+        post.hashtags = " ".join(request.hashtags)
+    if request.topic is not None:
+        post.topic = request.topic
+    
+    db.commit()
+    db.refresh(post)
     
     return post
 

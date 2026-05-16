@@ -1,138 +1,96 @@
-try:
-    import replicate
-    HAS_REPLICATE = True
-except ImportError:
-    HAS_REPLICATE = False
-    
-from typing import Optional
-from pydantic import BaseModel
-from app.services.llm_service import LLMService
+import os
+import re
+import replicate
+from typing import Dict, Optional
+from langchain_groq import ChatGroq
+from langchain_core.messages import HumanMessage, SystemMessage
 from app.core.config import settings
 
 
-class ImageResult(BaseModel):
-    """Result of image generation."""
-    url: str
-    prompt: str
-    concept: str
-    style: str
-
-
 class ImageGenerationService:
-    """Generate images for LinkedIn posts using Replicate API."""
-    
+
     def __init__(self):
-        self.llm_service = LLMService()
-    
-    async def generate_image_for_post(
-        self,
-        post_text: str,
-        style: str = "modern",
-        brand_colors: Optional[dict] = None
-    ) -> ImageResult:
-        """Extract key visual concepts from post and generate image."""
-        
-        # Step 1: Extract visual concept from post
-        concept = await self._extract_visual_concept(post_text)
-        
-        # Step 2: Create image prompt
-        image_prompt = await self._create_image_prompt(concept, post_text, style)
-        
-        # Step 3: Generate image using Stable Diffusion via Replicate
-        if settings.REPLICATE_API_TOKEN:
-            image_url = await self._call_replicate(image_prompt)
-        else:
-            # Fallback: return placeholder
-            image_url = "https://via.placeholder.com/1200x628"
-        
-        return ImageResult(
-            url=image_url,
-            prompt=image_prompt,
-            concept=concept,
-            style=style,
+        self.llm = ChatGroq(
+            model="llama-3.1-8b-instant",
+            temperature=0.7,
+            api_key=os.getenv("GROQ_API_KEY"),
         )
-    
-    async def _extract_visual_concept(self, post_text: str) -> str:
-        """Use LLM to extract key visual elements from post."""
-        
-        prompt = f"""
-        Extract the main visual concept or scene that would best accompany this LinkedIn post.
-        Be specific and visual.
-        
-        Post:
-        {post_text}
-        
-        Return ONE sentence describing the visual concept:
-        """
-        
-        response = await self.llm_service.generate(prompt)
-        return response.content.strip()
-    
-    async def _create_image_prompt(
+
+    async def generate_for_post(
         self,
-        concept: str,
-        post_text: str,
-        style: str
-    ) -> str:
-        """Create a detailed image prompt for Stable Diffusion."""
-        
-        style_descriptions = {
-            "modern": "sleek, contemporary, professional, minimal",
-            "vibrant": "colorful, energetic, dynamic, playful",
-            "professional": "corporate, formal, business, polished",
-            "creative": "artistic, imaginative, inspiring, unique",
-        }
-        
-        style_desc = style_descriptions.get(style, "professional")
-        
-        # Extract theme from post
-        if any(word in post_text.lower() for word in ["growth", "scale", "success"]):
-            theme = "upward growth, success"
-        elif any(word in post_text.lower() for word in ["team", "collaborate", "together"]):
-            theme = "teamwork, collaboration"
-        elif any(word in post_text.lower() for word in ["learn", "education", "knowledge"]):
-            theme = "learning, knowledge, innovation"
-        else:
-            theme = "professional achievement"
-        
-        prompt = f"""
-        Create a {style_desc} LinkedIn-optimized image for this concept:
-        
-        {concept}
-        
-        Theme: {theme}
-        
-        Style: {style}
-        
-        Include: professional aesthetics, modern design elements, clear focal point
-        Exclude: people's faces, brand logos, text overlays
-        
-        High quality, 1200x628 aspect ratio (LinkedIn standard)
+        post_content: str,
+        style: str = "modern_professional",
+    ) -> Dict:
         """
-        
-        return prompt.strip()
-    
-    async def _call_replicate(self, prompt: str) -> str:
-        """Call Replicate API to generate image."""
-        
-        if not HAS_REPLICATE:
-            print("Warning: Replicate package not available, using placeholder")
-            return "https://via.placeholder.com/1200x628"
-        
+        Full pipeline: extract concept → build image prompt → call Replicate → return URL
+        """
         try:
+            # Step 1: extract visual concept
+            concept = await self._extract_concept(post_content)
+
+            # Step 2: build image prompt
+            image_prompt = self._build_image_prompt(concept, style)
+
+            # Step 3: call Replicate (SDXL)
+            if not os.getenv("REPLICATE_API_TOKEN"):
+                return {
+                    "success": False,
+                    "error": "REPLICATE_API_TOKEN missing",
+                    "url": "https://via.placeholder.com/1200x628?text=Configure+Replicate+API"
+                }
+
             output = replicate.run(
                 "stability-ai/sdxl:39ed52f2a60c3b36b4bab839c580fc724bccc63c521b302d402d3beed3f60303",
                 input={
-                    "prompt": prompt,
-                    "negative_prompt": "low quality, blurry, distorted, ugly",
-                    "guidance_scale": 7.5,
-                    "num_inference_steps": 30,
+                    "prompt":            image_prompt,
+                    "negative_prompt":   "text, watermark, logo, people's faces, blur, low quality",
+                    "width":             1200,
+                    "height":            628,
+                    "num_inference_steps": 25,
+                    "guidance_scale":    7.5,
                 },
-                timeout=120,
             )
-            
-            return output[0] if output else "https://via.placeholder.com/1200x628"
-        
+
+            image_url = output[0] if output else None
+
+            return {
+                "success": True,
+                "url":     image_url,
+                "prompt":  image_prompt,
+                "concept": concept
+            }
+
         except Exception as e:
-            print(f"Image generation error: {e}")
-            return "https://via.placeholder.com/1200x628"
+            return {
+                "success": False,
+                "error":   str(e),
+                "url":     "https://via.placeholder.com/1200x628?text=Generation+Failed"
+            }
+
+    async def _extract_concept(self, text: str) -> str:
+        """Extract a single visual metaphor from the post text."""
+        prompt = f"""
+        Analyze this LinkedIn post and describe ONE sharp visual scene or metaphor that represents it.
+        Avoid clichés. Be specific. No text in the image.
+        
+        POST:
+        {text}
+        
+        Return ONLY the scene description (max 20 words):
+        """
+        resp = await self.llm.ainvoke([
+            SystemMessage(content="You are a visual director. Describe scenes clearly."),
+            HumanMessage(content=prompt)
+        ])
+        return resp.content.strip()
+
+    def _build_image_prompt(self, concept: str, style: str) -> str:
+        """Turn concept into a detailed SDXL prompt."""
+        styles = {
+            "modern_professional": "High-end corporate photography, cinematic lighting, 8k resolution, professional color grading, clean composition, shallow depth of field.",
+            "digital_art": "Modern flat illustration, vibrant colors, clean lines, tech-focused, minimalist aesthetic, vector style.",
+            "dramatic": "High contrast, moody lighting, bold shadows, powerful composition, cinematic 35mm film look."
+        }
+        
+        style_suffix = styles.get(style, styles["modern_professional"])
+        return f"{concept}. {style_suffix} LinkedIn-optimized, professional, sleek, high quality."
